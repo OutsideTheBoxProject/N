@@ -126,3 +126,112 @@ dev.off()
 png("./plots/log12.png")
 plot(log12_clear, type="l", col="red")
 dev.off()
+
+#some statistical analysis piped into a logfile
+analysis = "analysis.txt"
+
+line = "log00: "
+write(line,file=analysis,append=TRUE)
+line = paste("Max: ", max(log00_clear), sep = "")
+write(line,file=analysis,append=TRUE)
+line = paste("Min: ", min(log00_clear), sep = "")
+write(line,file=analysis,append=TRUE)
+line = ""
+write(line,file=analysis,append=TRUE)
+
+
+line = "log01: "
+write(line,file=analysis,append=TRUE)
+line = paste("Max: ", max(log01_clear), sep = "")
+write(line,file=analysis,append=TRUE)
+line = paste("Min: ", min(log01_clear), sep = "")
+write(line,file=analysis,append=TRUE)
+line = ""
+write(line,file=analysis,append=TRUE)
+
+line = "log02: "
+write(line,file=analysis,append=TRUE)
+line = paste("Max: ", max(log02_clear), sep = "")
+write(line,file=analysis,append=TRUE)
+line = paste("Min: ", min(log02_clear), sep = "")
+write(line,file=analysis,append=TRUE)
+line = ""
+write(line,file=analysis,append=TRUE)
+
+line = "log03: "
+write(line,file=analysis,append=TRUE)
+line = paste("Max: ", max(log03_clear), sep = "")
+write(line,file=analysis,append=TRUE)
+line = paste("Min: ", min(log03_clear), sep = "")
+write(line,file=analysis,append=TRUE)
+line = ""
+write(line,file=analysis,append=TRUE)
+
+line = "log04: "
+write(line,file=analysis,append=TRUE)
+line = paste("Max: ", max(log04_clear), sep = "")
+write(line,file=analysis,append=TRUE)
+line = paste("Min: ", min(log04_clear), sep = "")
+write(line,file=analysis,append=TRUE)
+line = ""
+write(line,file=analysis,append=TRUE)
+
+line = "log05: "
+write(line,file=analysis,append=TRUE)
+line = paste("Max: ", max(log05_clear), sep = "")
+write(line,file=analysis,append=TRUE)
+line = paste("Min: ", min(log05_clear), sep = "")
+write(line,file=analysis,append=TRUE)
+line = ""
+write(line,file=analysis,append=TRUE)
+
+line = "log06: "
+write(line,file=analysis,append=TRUE)
+line = paste("Max: ", max(log06_clear), sep = "")
+write(line,file=analysis,append=TRUE)
+line = paste("Min: ", min(log06_clear), sep = "")
+write(line,file=analysis,append=TRUE)
+line = ""
+write(line,file=analysis,append=TRUE)
+
+line = "log07: "
+write(line,file=analysis,append=TRUE)
+line = paste("Max: ", max(log07_clear), sep = "")
+write(line,file=analysis,append=TRUE)
+line = paste("Min: ", min(log07_clear), sep = "")
+write(line,file=analysis,append=TRUE)
+line = ""
+write(line,file=analysis,append=TRUE)
+
+line = "log08: "
+write(line,file=analysis,append=TRUE)
+line = paste("Max: ", max(log08_clear), sep = "")
+write(line,file=analysis,append=TRUE)
+line = ""
+write(line,file=analysis,append=TRUE)
+
+line = "log09: "
+write(line,file=analysis,append=TRUE)
+line = paste("Max: ", max(log09_clear), sep = "")
+write(line,file=analysis,append=TRUE)
+line = ""
+write(line,file=analysis,append=TRUE)
+
+line = "log10: "
+write(line,file=analysis,append=TRUE)
+line = paste("Max: ", max(log10_clear), sep = "")
+write(line,file=analysis,append=TRUE)
+line = ""
+write(line,file=analysis,append=TRUE)
+
+line = "log11: "
+write(line,file=analysis,append=TRUE)
+line = paste("Max: ", max(log11_clear), sep = "")
+write(line,file=analysis,append=TRUE)
+line = ""
+write(line,file=analysis,append=TRUE)
+
+line = "log12: "
+write(line,file=analysis,append=TRUE)
+line = paste("Max: ", max(log12_clear), sep = "")
+write(line,file=analysis,append=TRUE)

@@ -1,0 +1,37 @@
+log00: 
+Max: 785
+
+log01: 
+Max: 982
+
+log02: 
+Max: 1023
+
+log03: 
+Max: 981
+log04: 
+Max: 981
+
+log05: 
+Max: 982
+
+log06: 
+Max: 970
+
+log07: 
+Max: 983
+
+log08: 
+Max: 976
+
+log09: 
+Max: 1023
+
+log10: 
+Max: 972
+
+log11: 
+Max: 980
+
+log12: 
+Max: 981
