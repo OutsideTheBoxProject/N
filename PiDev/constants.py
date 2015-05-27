@@ -1,0 +1,6 @@
+PICS = "./testpics/"
+
+SCREENHEIGHT = 600
+SCREENWIDTH = 1024
+
+WAITTIME = 300
