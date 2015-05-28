@@ -18,6 +18,7 @@ boolean endPic = 0;   // true if no more data from camera is available
 
 File picFile;
 int picindex = 0;    // picture index for filename
+char filename[10];
 
 long int block = 0x0000;  // data pointer for reading from camera
 byte packageSize = 0x40; // chunks of data read from the camera
@@ -44,13 +45,11 @@ void setup() {
   Serial.println(" done.");
   
   // initialise camera
-  camSerial.begin(115200);
+  camSerial.begin(38400);
   delay(200);
   SendResetCmd();//Wait 2-3 second to send take picture command
   delay(2000);
   SetBaudRateCmd(0x2A);
-  delay(100);
-  camSerial.begin(38400);
   delay(100);
   SetImageSizeCmd(0x1C);
   delay(100);
@@ -75,21 +74,22 @@ void loop() {
       byte a[2];
       long int j, k, count;
       byte incomingbyte;
-      picindex++;
-      String filename = String(String(picindex) + ".jpg");
-      char __filename[sizeof(filename)];
-      filename.toCharArray(__filename, sizeof(__filename));
+      do {
+        //create a filename to store photo at
+        sprintf(filename, "%i.jpg", picindex++);
+      }
+      while(SD.exists(filename)); //loop if it exists already
 
       s1 = millis();
       Serial.println("Taking picture");
   
       SendTakePhotoCmd();
-      delay(500);
+      delay(200);
       while(camSerial.available()>0)
         incomingbyte=camSerial.read();
 
       Serial.println("Getting data, writing file");
-      picFile = SD.open(__filename, FILE_WRITE); 
+      picFile = SD.open(filename, FILE_WRITE); 
       while(!endPic)  {
         k=0;
         count=0;
@@ -99,7 +99,6 @@ void loop() {
         while(camSerial.available()>0)  {
           incomingbyte=camSerial.read();
           k++;
-//          delayMicroseconds(100); 
           if((k>5)&&(count<packageSize)&&(!endPic)) {
             a[0]=a[1];
             a[1]=incomingbyte;
