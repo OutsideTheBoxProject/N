@@ -41,6 +41,24 @@ void BtSend(char* i_pBtCmd, bool i_ln = true){
 }
 
 
+bool BtCheckIfPaired(void) {
+  bool result = false;
+  paired = false;
+  BtSend("$$$", false);
+  BtSend("GK"); // receives connection status
+  int numVal = 0;
+    
+  if(strlen(gBtMsg) > 0) {
+      numVal= atoi(gBtMsg);
+  }  
+  if(numVal == 1){                  
+      result = true;
+  }
+  BtSend("---");              
+  return result;
+}
+
+
 void BtInit(void){
   bool btConnect = false;
    
@@ -56,24 +74,6 @@ void BtInit(void){
 //  BtSend("SM,0"); //Mode (0 = slave)
   BtSend("SA,2"); //Enable authentication 
   BtSend("---"); 
-  
-  while(!btConnect){
-    delay(1000);
-    BtSend("$$$", false);
-    BtSend("GK"); // receives connection status
-      
-    int numVal = 0;
-    
-    if(strlen(gBtMsg) > 0) {
-        numVal= atoi(gBtMsg);
-      }
-      
-      if(numVal == 1){                  
-        btConnect = true;
-      }
-
-      BtSend("---");              
-  }
 }
 
 
