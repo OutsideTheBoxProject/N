@@ -20,6 +20,8 @@ File picFile;
 int picindex = 0;    // picture index for filename
 char filename[10];
 
+byte incomingbyte;
+
 long int block = 0x0000;  // data pointer for reading from camera
 byte packageSize = 0x40; // chunks of data read from the camera
 
@@ -27,8 +29,11 @@ unsigned int s1, s2;
 
 
 void setup() {
-  // debug output for now, BT later
-  Serial.begin(115200);
+  // Start BT
+  if (false)
+    BtInit(); // this is only to configure, just starting the Serial should be anough...
+  else 
+    Serial.begin(115200);
 
   // maximum speed for SPI pins (11,12,13)
   SPI.setClockDivider(SPI_CLOCK_DIV2);
@@ -61,6 +66,8 @@ void setup() {
 
 
 void loop() {
+  // Check if paired
+  
   
   // *** Paired with base station
   if (paired) {
@@ -73,7 +80,6 @@ void loop() {
     if (trigger) {
       byte a[2];
       long int j, k, count;
-      byte incomingbyte;
       do {
         //create a filename to store photo at
         sprintf(filename, "%i.jpg", picindex++);
