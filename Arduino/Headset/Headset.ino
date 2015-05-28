@@ -50,14 +50,14 @@ void setup() {
   delay(2000);
   cam.chPictureSize(3);
   delay(50);
-  // not changing the baudrate for now
-  cam.chBaudRate(2);
-  delay(50);
-  //change serial to match new camera baud rate
-  camSerial.end();
-  // match the new baudrate
-  camSerial.begin(38400);
-  delay(50);  
+//  // not changing the baudrate for now
+//  cam.chBaudRate(2);
+//  delay(50);
+//  //change serial to match new camera baud rate
+//  camSerial.end();
+//  // match the new baudrate
+//  camSerial.begin(38400);
+//  delay(50);  
   
   Serial.println("Initialised camera.");
   

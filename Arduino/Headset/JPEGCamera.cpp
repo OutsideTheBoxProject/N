@@ -2,6 +2,7 @@
  * Copyright 2010 SparkFun Electronic
  * Written by Ryan Owens
  * Modified by Emmanuel ALLAUD (2013)
+ * Modified by Chris Frauenberger (2015)
 */
 
 #include "JPEGCamera.h"
@@ -12,7 +13,7 @@ const char RESET_CAMERA[4] = {0x56, 0x00, 0x26, 0x00};
 const char TAKE_PICTURE[5] = {0x56, 0x00, 0x36, 0x01, 0x00};
 const char STOP_TAKING_PICS[5] = {0x56, 0x00, 0x36, 0x01, 0x03};
 char POWER_SAVING[] = {0x56,0x00,0x3E,0x03,0x00,0x01,0x00};
-char CHANGE_BAUD_RATE[] = {0x56, 0x00, 0x24, 0x03, 0x01, 0x00, 0x00 };
+char CHANGE_BAUD_RATE[] = {0x56, 0x00, 0x24, 0x03, 0x01, 0x00 };
 char CHANGE_PICT_SIZE[] = {0x56, 0x00, 0x54, 0x01, 0x00};
 char READ_DATA[8] = {0x56, 0x00, 0x32, 0x0C, 0x00, 0x0A, 0x00, 0x00};
 
@@ -68,23 +69,24 @@ void JPEGCamera::chBaudRate(byte bd_rate)
   switch(bd_rate) {
   case 0: // 9600
     CHANGE_BAUD_RATE[5] = 0xAE;
-    CHANGE_BAUD_RATE[6] = 0xC8;
     break;
-  case 1: // 19200
-    CHANGE_BAUD_RATE[5] = 0x56;
-    CHANGE_BAUD_RATE[6] = 0xE4;
-    break;
-  case 2: // 38400
+  case 1: // 38400
     CHANGE_BAUD_RATE[5] = 0x2A;
-    CHANGE_BAUD_RATE[6] = 0xF2;
     break;
-  case 3: // 57600
+  case 2: // 57600
     CHANGE_BAUD_RATE[5] = 0x1C;
-    CHANGE_BAUD_RATE[6] = 0x4C;
     break;
-  case 4: // 115200
+  case 3: // 115200
     CHANGE_BAUD_RATE[5] = 0x0D;
-    CHANGE_BAUD_RATE[6] = 0xA6;
+    break;
+  case 4: // 128000
+    CHANGE_BAUD_RATE[5] = 0xAE;
+    break;
+  case 5: // 256000
+    CHANGE_BAUD_RATE[5] = 0x56;
+    break;
+  default: //Everything else -> 38400
+    CHANGE_PICT_SIZE[5] = 0x2A;    
   }
 
   while (cameraPort.available()) cameraPort.read();
@@ -189,7 +191,7 @@ int JPEGCamera::readData(Stream& output)
     cameraPort.write((byte)0x0A);	
     address += 32;
 
-    delay(25);
+    delay(5);
 
     //Discard the response header.
     while(!cameraPort.available());
