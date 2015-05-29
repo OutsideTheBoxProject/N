@@ -28,7 +28,7 @@ volatile boolean Pulse = false;     // "True" when User's live heartbeat is dete
 volatile boolean QS = false;        // becomes true when Arduoino finds a beat.
 
 // Regards Serial OutPut  -- Set This Up to your needs
-static boolean serialVisual = false;   // Set to 'false' by Default.  Re-set to 'true' to see Arduino Serial Monitor ASCII Visual Pulse 
+static boolean serialVisual = true;   // Set to 'false' by Default.  Re-set to 'true' to see Arduino Serial Monitor ASCII Visual Pulse 
 
 
 void setup(){
@@ -48,7 +48,7 @@ void setup(){
 //  Where the Magic Happens
 void loop(){
   
-    serialOutput() ;       
+//    serialOutput() ;       
     
   if (QS == true){     //  A Heartbeat Was Found
                        // BPM and IBI have been Determined
@@ -64,8 +64,8 @@ void loop(){
       digitalWrite(blinkPin,LOW);            // There is not beat, turn off pin 13 LED
       }
      
-   ledFadeToBeat();                      // Makes the LED Fade Effect Happen 
-   logLoop();
+//   ledFadeToBeat();                      // Makes the LED Fade Effect Happen 
+//   logLoop();
   delay(20);                             //  take a break
   //logLoop();
 }

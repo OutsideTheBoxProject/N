@@ -1,6 +1,3 @@
-
-
-
 volatile int rate[10];                    // array to hold last ten IBI values
 volatile unsigned long sampleCounter = 0;          // used to determine pulse timing
 volatile unsigned long lastBeatTime = 0;           // used to find IBI
@@ -12,20 +9,19 @@ volatile boolean firstBeat = true;        // used to seed rate array so we start
 volatile boolean secondBeat = false;      // used to seed rate array so we startup with reasonable BPM
 
 
-// Note: Use of Timer1 interferes with PWM on pins 9 and 10!
 void interruptSetup(){     
-  // Initializes Timer1 to throw an interrupt every 2mS.
-  TCCR1A = 0x00; // DISABLE OUTPUTS AND PWM ON DIGITAL PINS 9 & 10
-  TCCR1B = 0x11; // GO INTO 'PHASE AND FREQUENCY CORRECT' MODE, NO PRESCALER
-  TCCR1C = 0x00; // DON'T FORCE COMPARE
-  TIMSK1 = 0x01; // ENABLE OVERFLOW INTERRUPT (TOIE1)
-  ICR1 = 16000;  // TRIGGER TIMER INTERRUPT EVERY 2mS  
-  sei();         // MAKE SURE GLOBAL INTERRUPTS ARE ENABLED     
+  // Initializes Timer2 to throw an interrupt every 2mS.
+  TCCR2A = 0x02;     // DISABLE PWM ON DIGITAL PINS 3 AND 11, AND GO INTO CTC MODE
+  TCCR2B = 0x06;     // DON'T FORCE COMPARE, 256 PRESCALER 
+  OCR2A = 0X7C;      // SET THE TOP OF THE COUNT TO 124 FOR 500Hz SAMPLE RATE
+  TIMSK2 = 0x02;     // ENABLE INTERRUPT ON MATCH BETWEEN TIMER2 AND OCR2A
+  sei();             // MAKE SURE GLOBAL INTERRUPTS ARE ENABLED      
 } 
 
-// THIS IS THE TIMER 1 INTERRUPT SERVICE ROUTINE. 
-// Timer 1 makes sure that we take a reading every 2 miliseconds
-ISR(TIMER1_OVF_vect){                         // triggered when Timer2 counts to 124
+
+// THIS IS THE TIMER 2 INTERRUPT SERVICE ROUTINE. 
+// Timer 2 makes sure that we take a reading every 2 miliseconds
+ISR(TIMER2_COMPA_vect){                         // triggered when Timer2 counts to 124
   cli();                                      // disable interrupts while we do this
   Signal = analogRead(pulsePin);              // read the Pulse Sensor 
   sampleCounter += 2;                         // keep track of the time in mS with this variable

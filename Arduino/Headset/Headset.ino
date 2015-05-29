@@ -30,7 +30,7 @@ byte packageSize = 0x40; // chunks of data read from the camera
 unsigned int s1, s2;
 
 // ************** For the PulseSensor
-int pulsePin = 7;
+int pulsePin = 0; // first analog in
 // Volatile Variables, used in the interrupt service routine!
 volatile int BPM;                   // int that holds raw Analog in 0. updated every 2mS
 volatile int Signal;                // holds the incoming raw data
@@ -52,8 +52,8 @@ void setup() {
   // Setup SD card
   // pin 10 is chipselect
   Serial.print("Preparing SD card... ");
-  pinMode(10, OUTPUT);
-  if (!SD.begin(10))
+  pinMode(8, OUTPUT);
+  if (!SD.begin(8))
   {
     Serial.println("initialization failed!");
     return;
@@ -72,8 +72,9 @@ void setup() {
 
   Serial.println("Initialised camera.");
   
-  pulseFile = SD.open("pulse.csv", FILE_WRITE); 
-  
+  interruptSetup();
+  Serial.println("Initialised PulseSensor.");
+    
   trigger = 1;
 }
 
@@ -83,12 +84,14 @@ void loop() {
   // log pulse
   if (QS == true) {  //  A Heartbeat Was Found
                      // BPM and IBI have been Determined
+    pulseFile = SD.open("pulse.csv", FILE_WRITE);                    
     pulseFile.print("Timestamp;");
     pulseFile.println(String(BPM));
+    pulseFile.close();
     QS = false;
   }
   
-  paired = BtCheckIfPaired();    // Check if paired
+//  paired = BtCheckIfPaired();    // Check if paired
   
   // *** Paired with base station
   if (paired) {
@@ -121,7 +124,7 @@ void loop() {
       while(camSerial.available()>0)
         incomingbyte=camSerial.read();
 
-      Serial.println("Getting data, writing file");
+      Serial.println("Getting data, writing file " + String(filename));
       picFile = SD.open(filename, FILE_WRITE); 
       while(!endPic)  {
         k=0;
