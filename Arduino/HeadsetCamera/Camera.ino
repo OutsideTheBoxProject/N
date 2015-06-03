@@ -47,7 +47,6 @@ void CamTakePicture() {
   }
   i=0x0000;
   EndFlag=0;
-  picFile.close(); 
   s2 = millis();
   Serial.println("Done in " + String(s2-s1));
 }
