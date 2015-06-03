@@ -15,6 +15,11 @@ LINEWIDTH = 2
 AMPLITUDE = 90
 SPEED = 1
 
-
-# this is only valid for testing
-PULSEDATA = "./pulsedata/fakedata.txt"
+SWEEPFILE = "./tempSweepFile.txt"
+# in tagen
+SWEEPTIME = 7
+PRINT = 0
+MOVE = 1
+DELETE = 2
+SWEEPMODE = PRINT
+MOVEFOLDER = "./deletedpics/"
