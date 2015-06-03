@@ -2,6 +2,7 @@
 import PIL
 from PIL import Image
 import sys
+import os
 
 # local imports
 import constants as con
@@ -9,13 +10,15 @@ import constants as con
 
 # main function
 def resize_images(filedir):
-	files = os.listdir()
+	files = os.listdir(filedir)
 	for f in files:
+		print "dealing with " + filedir + f
 		img = Image.open(filedir + f)
-		hpercent = (con.SCREENHEIGHT / float(img.size[1]))
-		wsize = int((float(img.size[0]) * float(hpercent)))
-		img = img.resize((wsize, con.SCREENHEIGHT), PIL.Image.ANTIALIAS)
-		img.save()
+		# hpercent = (600 / float(img.size[1]))
+		# wsize = int((float(img.size[0]) * float(hpercent)))
+		img = img.resize((con.PICTUREWIDTH, con.PICTUREHEIGHT), PIL.Image.ANTIALIAS)
+		img.save(filedir + f)
+	print "done."
 		
 	
 
