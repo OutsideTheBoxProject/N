@@ -1,20 +1,8 @@
-boolean SDinit(boolean wipe) {
+boolean SDinit() {
 
   pinMode(sdCSPin, OUTPUT);
-  if (SD.begin(sdCSPin)) {
-    if (wipe) {
-      Serial.println("Wiping SD");
-      File root = SD.open("/");
-      File nextFile = root.openNextFile();
-      while (nextFile) {
-        SD.remove(nextFile.name());
-        Serial.println("Removing " + String(nextFile.name()));
-        nextFile = root.openNextFile();
-      }
-      root.close(); 
-    }
+  if (SD.begin(sdCSPin))
     return true;
-  }
   return false; 
 }
 

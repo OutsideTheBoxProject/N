@@ -54,7 +54,7 @@ void setup()
  
    // initialise SD and wipe if true
   Serial.println("Initializing SD card...");
-  if (SDinit(true)) Serial.println("done!");
+  if (SDinit()) Serial.println("done!");
   else Serial.println("failed...");
   
   // test the RTC
@@ -121,7 +121,8 @@ void loop()
       Serial.println("\nLogging Pulse, qs:" + String(qs) + " BPM:" + String(bpm));
     
       if (qs) {
-        logFile = SD.open("pulse.txt");
+        Serial.println("actually logging, qs is true");
+        logFile = SD.open("pulse.txt", FILE_WRITE);
         printTimestamp(logFile, time);
         logFile.print(";"); // delimiter
         logFile.print(String(signal));
