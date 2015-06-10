@@ -11,9 +11,7 @@ void CamTakePicture() {
   int ii;       
   unsigned int s1, s2;
 
-  s1 = millis();
-  Serial.println("Taking picture " + String(picFile.name()));
-   
+  s1 = millis();   
   SendTakePhotoCmd();
   delay(500);
   while(camSerial.available()>0)

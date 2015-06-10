@@ -42,11 +42,6 @@ int trigger = 1; // take a picture
 tmElements_t time;
 
 File logFile;
-
-// Pulse variables
-int bpm = 0;
-int signal = 0;
-int qs = 0;
  
 void setup()
 {
@@ -87,9 +82,10 @@ void loop()
       sprintf(filename, "%i.jpg", picindex++);
     }
     while(SD.exists(filename)); //loop if it exists already    
-  
+   
     picFile = SD.open(filename, FILE_WRITE);  
     if (picFile) {
+      Serial.println("Taking picture " + String(picFile.name()));
       CamTakePicture();
       picFile.close(); 
       logFile = SD.open("log.txt", FILE_WRITE);
@@ -102,9 +98,9 @@ void loop()
   else {
     // log pulse data 
     uint8_t buf[6];
-    bpm = 0x0;
-    signal = 0x0;
-    qs = 0x0;
+    int bpm = 0x0;
+    int signal = 0x0;
+    int qs = 0x0;
     int i = 0;
     
     Wire.requestFrom(pulseID, 6); // request 6 bytes from pulse arduino
@@ -118,10 +114,9 @@ void loop()
       bpm =  buf[2] | (buf[3]<<8);
       signal =  buf[4] | (buf[5]<<8);
 
-      Serial.println("\nLogging Pulse, qs:" + String(qs) + " BPM:" + String(bpm));
+      Serial.println("Logging Pulse, qs:" + String(qs) + " BPM:" + String(bpm));
     
       if (qs) {
-        Serial.println("actually logging, qs is true");
         logFile = SD.open("pulse.txt", FILE_WRITE);
         printTimestamp(logFile, time);
         logFile.print(";"); // delimiter
