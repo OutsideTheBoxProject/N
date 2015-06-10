@@ -55,6 +55,9 @@ void setup()
   // test the RTC
   setupRTC();
   
+  // setup BT
+//  setupBt();
+  
   // init Camera
   camSerial.begin(115200);
   delay(200);
@@ -68,6 +71,13 @@ void setup()
  
 void loop()
 {
+  
+//  if (BtAvailable()) {
+//    
+//    
+//  }
+//  else {
+    
   // get the time
   RTC.read(time);
   
