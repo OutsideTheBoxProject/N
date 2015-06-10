@@ -72,8 +72,8 @@ void setup() {
 
   Serial.println("Initialised camera.");
   
-  interruptSetup();
-  Serial.println("Initialised PulseSensor.");
+  //interruptSetup();
+  //Serial.println("Initialised PulseSensor.");
     
   trigger = 1;
 }

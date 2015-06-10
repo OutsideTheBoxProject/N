@@ -39,27 +39,24 @@ void setup(){
 
 void loop()
 {
-  delay(200);
-  if (QS) Serial.println(BPM);
+  delay(300);
+  if (QS) Serial.print(" " + String(BPM));
 }
 
 // function that executes whenever data is requested by master
 // this function is registered as an event, see setup()
 void requestEvent()
 {
-  Serial.println("Received request, sending bpm " + String(BPM));
-  byte qs_l = (int)QS;
-  byte qs_h = (int)QS >>  8;
-  byte bpm_l = BPM;
-  byte bpm_h = BPM >> 8;
-  byte signal_l = Signal;
-  byte signal_h = Signal >> 8;
-  
-  Wire.write(qs_l); // two bytes 
-  Wire.write(qs_h);
-  Wire.write(bpm_l); // two bytes 
-  Wire.write(bpm_h);
-  Wire.write(signal_l); // two bytes 
-  Wire.write(signal_h); 
+  Serial.println("\n\nReceived request, sending bpm " + String(BPM));
+  uint8_t buf[6];
+  buf[0] = (int)QS;
+  buf[1] = (int)QS >>  8;
+  buf[2] = BPM;
+  buf[3] = BPM >> 8;
+  buf[4] = Signal;
+  buf[5] = Signal >> 8;
+  Wire.write(buf, 6); 
+
+
 }
 
