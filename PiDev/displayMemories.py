@@ -7,6 +7,7 @@ from PIL import Image
 
 # local imports
 import constants as con
+import logging as log
 
 # global variables
 running = 0
@@ -153,6 +154,7 @@ def perform_sweep():
 					if not os.path.exists(mfolder):
 						os.makedirs(mfolder)
 					os.rename(key + f, mfolder + "/" + f)
+			log.log_picture_deletion(key + f)
 			if len(get_dir_content(key)) == 0:
 				os.rmdir(key)
 	
@@ -162,6 +164,8 @@ def main():
 	play_recent_files(con.PICS)
 	perform_sweep()
 	while True:
+		if con.LOGGING:
+			log.log_picture_cycle()
 		play_all_files(con.PICS)
 		
 # initialise screen

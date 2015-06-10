@@ -1,5 +1,3 @@
-PICS = "./testpics/"
-
 SCREENHEIGHT = 600
 SCREENWIDTH = 1024
 
@@ -27,3 +25,8 @@ MOVEFOLDER = "./deletedpics/"
 FONT = "./AblePro.otf"
 
 LOGGING = 1
+BPM = "./BPM/"
+PICS = "./testpics/"
+STATIONLOG = "./stationlog.csv"
+
+
