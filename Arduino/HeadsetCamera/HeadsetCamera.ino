@@ -59,15 +59,11 @@ void setup()
   camSerial.begin(115200);
   delay(200);
   SendResetCmd();//Wait 2-3 second to send take picture command
-  delay(2000);
-  SetBaudRateCmd(0x2A);
-  delay(100);
-  camSerial.begin(38400);
-  delay(100);
+  delay(3000);
   SetImageSizeCmd(0x1D);
   delay(100);
-  
-  
+  SetBaudRateCmd(0x0D);
+  delay(200);  
 }
  
 void loop()

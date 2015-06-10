@@ -1,9 +1,7 @@
 boolean SDinit() {
 
   pinMode(sdCSPin, OUTPUT);
-  if (SD.begin(sdCSPin))
-    return true;
-  return false; 
+  return SD.begin(sdCSPin);
 }
 
 void printTimestamp(File logFile, tmElements_t tm) {
