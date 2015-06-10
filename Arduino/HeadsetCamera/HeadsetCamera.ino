@@ -1,9 +1,22 @@
-//*******************************************************
-// OutsideTheBox (http://outsidethebox.at)
-// @author Christopher Frauenberger
-// @created 27 May 2015
-//
-//*******************************************************
+/*
+ OutsideTheBox (http://outsidethebox.at)
+ @author Christopher Frauenberger
+ @created 27 May 2015
+
+ Wiring
+ D5  Camera TX    // Camera SoftwareSerial
+ D6  Camera RX
+ D10 SD CS        // SD Card SPI 
+ D11 SD DI
+ D12 SD DO
+ D13 SD CLK
+ A4  data, SDA -> HeadbandPulse arduino A4 / RTC SDA 
+ A5  clk, SCL -> HeadbandPulse arduino A5 / RTC SCL
+ 
+ Bluetooth SilverMate on UART
+
+*******************************************************
+*/
 
 #include <SoftwareSerial.h>
 #include <SPI.h>
@@ -11,6 +24,9 @@
 #include <Wire.h>
 #include <DS1307RTC.h>
 #include <Time.h>
+
+// i2c device id of pulse arduino (slave)
+#define pulseID 2
  
 // soft serial for camera (TXD = 5, RX = 6)
 SoftwareSerial camSerial(5,6);          // Set Arduino pin 4 and 5 as softserial 
@@ -18,7 +34,7 @@ SoftwareSerial camSerial(5,6);          // Set Arduino pin 4 and 5 as softserial
 File  picFile;      // file for pictures
 char filename[12];  // filename
 int picindex = 0;
-int sdCSPin = 8;
+int sdCSPin = 10;
 
 int trigger = 1; // take a picture
 
@@ -27,10 +43,7 @@ tmElements_t time;
 
 File logFile;
 
-// input pins to read pulse data
-int bpmPin = 2; // A2 [0..255] -> [0..255]
-int signalPin = 3; // A3 [0..255] -> [0..1024]
-int qsPin = 3; // D3: high if heartbeat was found
+// Pulse variables
 int bpm = 0;
 int signal = 0;
 int qs = 0;
@@ -40,12 +53,12 @@ void setup()
   Serial.begin(115200);
  
    // initialise SD and wipe if true
-  Serial.print("Initializing SD card...");
+  Serial.println("Initializing SD card...");
   if (SDinit(true)) Serial.println("done!");
   else Serial.println("failed...");
   
   // test the RTC
-  testRTC();
+  setupRTC();
   
   // init Camera
   camSerial.begin(115200);
@@ -59,8 +72,6 @@ void setup()
   SetImageSizeCmd(0x1D);
   delay(100);
   
-  // set up pin to read pulse
-  pinMode(qsPin, INPUT);   
   
 }
  
@@ -79,28 +90,50 @@ void loop()
   
     picFile = SD.open(filename, FILE_WRITE);  
     if (picFile) {
-      logFile = SD.open("log.txt");
+      CamTakePicture();
+      picFile.close(); 
+      logFile = SD.open("log.txt", FILE_WRITE);
       printTimestamp(logFile, time);
       logFile.print(";"); // delimiter
       logFile.println(filename); 
       logFile.close();
-      CamTakePicture();
-      picFile.close(); 
     }
   }
   else {
     // log pulse data 
-    bpm = analogRead(bpmPin);
-    signal = analogRead(signalPin);
-    qs = digitalRead(qsPin);
-    if (qs) {
-      logFile = SD.open("pulse.txt");
-      printTimestamp(logFile, time);
-      logFile.print(";"); // delimiter
-      logFile.print(String(signal));
-      logFile.print(";"); // delimiter
-      logFile.println(String(bpm));    
-      logFile.close();
+    byte buf[6];
+    bpm = 0x0;
+    signal = 0x0;
+    qs = 0x0;
+    int i = 0;
+    
+    Wire.requestFrom(pulseID, 6); // request 6 bytes from pulse arduino
+
+    while(Wire.available())    // slave may send less than requested
+      buf[i++] = Wire.read(); // receive a byte as character
+      
+    if (i == 6) {
+    
+      qs = buf[0] + buf[1]<<8;
+      bpm =  buf[2] + buf[3]<<8;
+      signal =  buf[4] + buf[5]<<8;
+
+      Serial.println("Logging Pulse with BPM: " + String(bpm));
+    
+      if (qs) {
+        logFile = SD.open("pulse.txt");
+        printTimestamp(logFile, time);
+        logFile.print(";"); // delimiter
+        logFile.print(String(signal));
+        logFile.print(";"); // delimiter
+        logFile.println(String(bpm));    
+        logFile.close();
+      }
     }
+    else 
+      Serial.println("Pulse arduino not available, no BPM received");
+    
   }
+  
+  trigger = !trigger;
 }

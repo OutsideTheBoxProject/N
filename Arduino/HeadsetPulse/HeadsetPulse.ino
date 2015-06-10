@@ -6,15 +6,19 @@
   Pulse Sensor Amped 1.4    by Joel Murphy and Yury Gitman   http://www.pulsesensor.com
 
  ----------------------       ----------------------  ----------------------
+
+  Wiring:
+  A0  PulseIn
+  A4  data, SDA -> HeadbandCamera arduino A4
+  A5  clk, SCL, -> HeadbandCamera arduino A5
+
 */
+#include <Wire.h>
+// i2c device id of pulse arduino (slave)
+#define pulseID 2
 
 //  Variables
 int pulsePin = 0;                 // Pulse Sensor purple wire connected to analog pin 0
-
-// output pins
-int bpmPin = 5; // PWM [0..255] -> [0..255]
-int signalPin = 6; // PWM [0..255] -> [0..1024]
-int qsPin = 7; // digital: high if heartbeat was found
 
 // Volatile Variables, used in the interrupt service routine!
 volatile int BPM;                   // int that holds raw Analog in 0. updated every 2mS
@@ -28,32 +32,34 @@ void setup(){
   Serial.begin(115200);             // we agree to talk fast!
   interruptSetup();                 // sets up to read Pulse Sensor signal every 2mS 
   
-  pinMode(bpmPin, OUTPUT);
-  pinMode(signalPin, OUTPUT);
-  pinMode(qsPin, OUTPUT);
-
+  Wire.begin(pulseID); 
+  
+  Wire.onRequest(requestEvent);
 }
 
+void loop()
+{
+  delay(200);
+  if (QS) Serial.println(BPM);
+}
 
-//  Where the Magic Happens
-void loop(){
+// function that executes whenever data is requested by master
+// this function is registered as an event, see setup()
+void requestEvent()
+{
+  Serial.println("Received request, sending bpm " + String(BPM));
+  byte qs_l = (int)QS;
+  byte qs_h = (int)QS >>  8;
+  byte bpm_l = BPM;
+  byte bpm_h = BPM >> 8;
+  byte signal_l = Signal;
+  byte signal_h = Signal >> 8;
   
-  if (QS == true) {     //  A Heartbeat Was Found
-                        // BPM and IBI have been Determined
-    analogWrite(signalPin, Signal / 2);                       
-    analogWrite(bpmPin, BPM);
-    digitalWrite(qsPin, HIGH);    
-    
-    Serial.println("BPM: " + String(BPM));                   
-                 
-    QS = false;                      // reset the Quantified Self flag for next time    
-  }
-  else {
-    analogWrite(signalPin, 0);                       
-    analogWrite(bpmPin, 0);
-    digitalWrite(qsPin, LOW);    
-  }
-  
-  delay(50);                             //  take a break
+  Wire.write(qs_l); // two bytes 
+  Wire.write(qs_h);
+  Wire.write(bpm_l); // two bytes 
+  Wire.write(bpm_h);
+  Wire.write(signal_l); // two bytes 
+  Wire.write(signal_h); 
 }
 

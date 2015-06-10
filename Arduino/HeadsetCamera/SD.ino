@@ -3,11 +3,12 @@ boolean SDinit(boolean wipe) {
   pinMode(sdCSPin, OUTPUT);
   if (SD.begin(sdCSPin)) {
     if (wipe) {
+      Serial.println("Wiping SD");
       File root = SD.open("/");
       File nextFile = root.openNextFile();
       while (nextFile) {
-        if (!nextFile.isDirectory())
-          SD.remove(nextFile.name());
+        SD.remove(nextFile.name());
+        Serial.println("Removing " + String(nextFile.name()));
         nextFile = root.openNextFile();
       }
       root.close(); 
