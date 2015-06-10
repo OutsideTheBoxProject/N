@@ -101,7 +101,7 @@ void loop()
   }
   else {
     // log pulse data 
-    byte buf[6];
+    uint8_t buf[6];
     bpm = 0x0;
     signal = 0x0;
     qs = 0x0;
@@ -113,12 +113,12 @@ void loop()
       buf[i++] = Wire.read(); // receive a byte as character
       
     if (i == 6) {
-    
-      qs = buf[0] + buf[1]<<8;
-      bpm =  buf[2] + buf[3]<<8;
-      signal =  buf[4] + buf[5]<<8;
+          
+      qs = buf[0] | (buf[1]<<8);
+      bpm =  buf[2] | (buf[3]<<8);
+      signal =  buf[4] | (buf[5]<<8);
 
-      Serial.println("Logging Pulse with BPM: " + String(bpm));
+      Serial.println("\nLogging Pulse, qs:" + String(qs) + " BPM:" + String(bpm));
     
       if (qs) {
         logFile = SD.open("pulse.txt");
