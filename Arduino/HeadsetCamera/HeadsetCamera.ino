@@ -36,10 +36,10 @@ char filename[12];  // filename
 int picindex = 0;
 int sdCSPin = 10;
 
-int trigger = 1; // take a picture
-
 // global time variables to be set by RTC
 tmElements_t time;
+
+unsigned long triggerMillis = 0;
 
 File logFile;
  
@@ -71,7 +71,9 @@ void loop()
   // get the time
   RTC.read(time);
   
-  if (trigger) {
+  unsigned long currentMillis = millis();
+  if ((currentMillis - triggerMillis) > 15000) {
+    triggerMillis = currentMillis;
     // take a picture
     do {
       //create a filename to store photo at
@@ -86,7 +88,7 @@ void loop()
       picFile.close(); 
       logFile = SD.open("log.txt", FILE_WRITE);
       printTimestamp(logFile, time);
-      logFile.print(";"); // delimiter
+      logFile.print(","); // delimiter
       logFile.println(filename); 
       logFile.close();
     }
@@ -115,9 +117,7 @@ void loop()
       if (qs) {
         logFile = SD.open("pulse.txt", FILE_WRITE);
         printTimestamp(logFile, time);
-        logFile.print(";"); // delimiter
-        logFile.print(String(signal));
-        logFile.print(";"); // delimiter
+        logFile.print(","); // delimiter
         logFile.println(String(bpm));    
         logFile.close();
       }
@@ -126,6 +126,5 @@ void loop()
       Serial.println("Pulse arduino not available, no BPM received");
     
   }
-  
-  trigger = !trigger;
+  delay(100);
 }
