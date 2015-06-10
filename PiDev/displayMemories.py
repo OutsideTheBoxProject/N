@@ -30,9 +30,9 @@ def display_bpms():
 	# fake some random data 
 	pulsedata = random.sample(range(50, 220), random.randint(1,30))
 	bpm = numpy.mean(pulsedata)
-	font = pygame.font.SysFont("monospace", 25)
-	bpmText = font.render("{0:.2f}".format(round(bpm,2)) + " bpm", 1, con.LINECOLOUR)
-	screen.blit(bpmText, (40, 10))
+	font = pygame.font.Font(con.FONT, 25)
+	bpmText = font.render("{0:}".format(int(round(bpm,2))) + " bpm", 1, con.LINECOLOUR)
+	screen.blit(bpmText, (con.SCREENWIDTH/15, 10))
 	prevx = 0
 	prevy = 40
 	for y in range(60, con.SCREENHEIGHT):
@@ -135,8 +135,8 @@ def perform_sweep():
 		to = int((todaydays - sweepdata[key][1])%con.SWEEPTIME)
 		maxpics = int( (1/(2**to)) * sweepdata[key][0])
 		curpics = get_dir_content(key)
-		if len(curpics) > maxpics:
-			todelete = len(curpics) - maxpics
+		todelete = len(curpics) - maxpics
+		if todelete > 0:
 			deletefiles = []
 			indices = random.sample(range(0,len(curpics)), todelete)
 			for ind in indices:

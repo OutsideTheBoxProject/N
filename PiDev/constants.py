@@ -23,3 +23,7 @@ MOVE = 1
 DELETE = 2
 SWEEPMODE = PRINT
 MOVEFOLDER = "./deletedpics/"
+
+FONT = "./AblePro.otf"
+
+LOGGING = 1
