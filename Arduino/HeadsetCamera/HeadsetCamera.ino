@@ -18,6 +18,9 @@
 *******************************************************
 */
 
+// if false, no debug messages are written to Serial
+#define DEBUG 1
+
 #include <SoftwareSerial.h>
 #include <SPI.h>
 #include <SD.h>
@@ -48,9 +51,11 @@ void setup()
   Serial.begin(115200);
  
    // initialise SD and wipe if true
-  Serial.println("Initializing SD card...");
-  if (SDinit()) Serial.println("done!");
-  else Serial.println("failed...");
+  if (DEBUG) Serial.println("Initializing SD card...");
+  if (SDinit()) 
+    if (DEBUG) Serial.println("done!");
+  else 
+    if (DEBUG) Serial.println("failed...");
   
   // test the RTC
   setupRTC();
@@ -93,7 +98,7 @@ void loop()
    
     picFile = SD.open(filename, FILE_WRITE);  
     if (picFile) {
-      Serial.println("Taking picture " + String(picFile.name()));
+      if (DEBUG) Serial.println("Taking picture " + String(picFile.name()));
       CamTakePicture();
       picFile.close(); 
       logFile = SD.open("log.txt", FILE_WRITE);
@@ -122,7 +127,7 @@ void loop()
       bpm =  buf[2] | (buf[3]<<8);
       signal =  buf[4] | (buf[5]<<8);
 
-      Serial.println("Logging Pulse, qs:" + String(qs) + " BPM:" + String(bpm));
+      if (DEBUG) Serial.println("Logging Pulse, qs:" + String(qs) + " BPM:" + String(bpm));
     
       if (qs) {
         logFile = SD.open("pulse.txt", FILE_WRITE);

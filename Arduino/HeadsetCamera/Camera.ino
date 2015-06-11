@@ -46,7 +46,7 @@ void CamTakePicture() {
   i=0x0000;
   EndFlag=0;
   s2 = millis();
-  Serial.println("Done in " + String(s2-s1));
+  if (DEBUG) Serial.println("Done in " + String(s2-s1));
 }
 
 
