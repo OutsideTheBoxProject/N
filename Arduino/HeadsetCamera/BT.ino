@@ -1,8 +1,7 @@
-char gBtMsg[256];
 char gBTAdr[13];
 char gBtCmd[256];
 
-void BtReceive(void){
+void BtReceive(void) {
   bool keepReading = true;
   byte incomingbyte;
   int index = 0;
@@ -38,10 +37,16 @@ void BtSend(char* i_pBtCmd, bool i_ln = true){
   
 }
 
+void BtSendW(char* x){
+  BtSend(x);
+}
+
+void BtSendO(char* x){
+  BtSend(x, false);
+}
 
 void setupBt(void) {
    
-  Serial.begin(115200); 
   BtSend("$$$", false);
   BtSend("SF,1"); // factory defaults
   BtSend("SN,Headband"); // set bt name
@@ -51,11 +56,13 @@ void setupBt(void) {
 //  BtSend("SO,%"); //Connect/Disconnect Status String
 //  BtSend("T,1"); //Pass Received Data (from UART or Bluetooth) while in Command Mode.
 //  BtSend("SM,0"); //Mode (0 = slave)
+//  BtSend("U,115200,N"); // set baudrate temporary
   BtSend("SA,1"); //Enable authentication 
   BtSend("---"); 
   
     
 }
+
 
 boolean BtAvailable(void) {
   BtSend("$$$", false);

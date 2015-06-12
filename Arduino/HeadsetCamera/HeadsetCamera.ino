@@ -19,7 +19,7 @@
 */
 
 // if false, no debug messages are written to Serial
-#define DEBUG 1
+#define DEBUG 0
 
 #include <SoftwareSerial.h>
 #include <SPI.h>
@@ -42,7 +42,11 @@ int sdCSPin = 10;
 // global time variables to be set by RTC
 tmElements_t time;
 
+// BT return message
+char gBtMsg[256];
+
 unsigned long triggerMillis = 0;
+unsigned long btMillis = 0;
 
 File logFile;
  
@@ -62,7 +66,7 @@ void setup()
   
   // setup BT
 //  setupBt();
-  
+   
   // init Camera
   camSerial.begin(115200);
   delay(200);
@@ -76,70 +80,95 @@ void setup()
  
 void loop()
 {
-  
-//  if (BtAvailable()) {
-//    
-//    
-//  }
-//  else {
-    
-  // get the time
-  RTC.read(time);
-  
   unsigned long currentMillis = millis();
-  if ((currentMillis - triggerMillis) > 15000) {
-    triggerMillis = currentMillis;
-    // take a picture
-    do {
-      //create a filename to store photo at
-      sprintf(filename, "%i.jpg", picindex++);
-    }
-    while(SD.exists(filename)); //loop if it exists already    
-   
-    picFile = SD.open(filename, FILE_WRITE);  
-    if (picFile) {
-      if (DEBUG) Serial.println("Taking picture " + String(picFile.name()));
-      CamTakePicture();
-      picFile.close(); 
-      logFile = SD.open("log.txt", FILE_WRITE);
-      printTimestamp(logFile, time);
-      logFile.print(","); // delimiter
-      logFile.println(filename); 
-      logFile.close();
+
+  if ((currentMillis - btMillis) > 10000) {
+    btMillis = currentMillis;
+    if (Serial.available() > 0) {
+      while(Serial.available()>0) Serial.read(); // discard everything incoming, we are connected
+      Serial.print("$HSStart-end");  
+      delay(100);
+      File root = SD.open("/");
+      root.rewindDirectory();
+      File entry = root.openNextFile();
+      while (entry) {
+        if (!entry.isDirectory()) {
+          Serial.print("Filename: ");
+          Serial.print(entry.name());
+          Serial.print("-end");
+          delay(100);
+        }
+        else {
+          Serial.print("DIR: ");
+          Serial.print(entry.name());
+          Serial.print("-end");
+          delay(100);
+        }
+        entry.close();
+        entry = root.openNextFile();
+      }
+      root.close();
+    Serial.print("$HSEnd-end");
+    delay(100);
     }
   }
   else {
-    // log pulse data 
-    uint8_t buf[6];
-    int bpm = 0x0;
-    int signal = 0x0;
-    int qs = 0x0;
-    int i = 0;
     
-    Wire.requestFrom(pulseID, 6); // request 6 bytes from pulse arduino
-
-    while(Wire.available())    // slave may send less than requested
-      buf[i++] = Wire.read(); // receive a byte as character
-      
-    if (i == 6) {
-          
-      qs = buf[0] | (buf[1]<<8);
-      bpm =  buf[2] | (buf[3]<<8);
-      signal =  buf[4] | (buf[5]<<8);
-
-      if (DEBUG) Serial.println("Logging Pulse, qs:" + String(qs) + " BPM:" + String(bpm));
-    
-      if (qs) {
-        logFile = SD.open("pulse.txt", FILE_WRITE);
+    // get the time
+    RTC.read(time);
+  
+    if ((currentMillis - triggerMillis) > 15000) {
+      triggerMillis = currentMillis;
+      // take a picture
+      do {
+        //create a filename to store photo at
+        sprintf(filename, "%i.jpg", picindex++);
+      }
+      while(SD.exists(filename)); //loop if it exists already    
+   
+      picFile = SD.open(filename, FILE_WRITE);  
+      if (picFile) {
+        if (DEBUG) Serial.println("Taking picture " + String(picFile.name()));
+          CamTakePicture();
+        picFile.close(); 
+        logFile = SD.open("log.txt", FILE_WRITE);
         printTimestamp(logFile, time);
         logFile.print(","); // delimiter
-        logFile.println(String(bpm));    
+        logFile.println(filename); 
         logFile.close();
       }
     }
-    else 
-      Serial.println("Pulse arduino not available, no BPM received");
+    else {
+      // log pulse data 
+      uint8_t buf[6];
+      int bpm = 0x0;
+      int signal = 0x0;
+      int qs = 0x0;
+      int i = 0;
     
+      Wire.requestFrom(pulseID, 6); // request 6 bytes from pulse arduino
+
+      while(Wire.available())    // slave may send less than requested
+        buf[i++] = Wire.read(); // receive a byte as character
+      
+      if (i == 6) {    
+        qs = buf[0] | (buf[1]<<8);
+        bpm =  buf[2] | (buf[3]<<8);
+        signal =  buf[4] | (buf[5]<<8);
+
+        if (DEBUG) Serial.println("Logging Pulse, qs:" + String(qs) + " BPM:" + String(bpm));
+    
+        if (qs) {
+          logFile = SD.open("pulse.txt", FILE_WRITE);
+          printTimestamp(logFile, time);
+          logFile.print(","); // delimiter
+          logFile.println(String(bpm));    
+          logFile.close();
+        }
+      }
+      else 
+        if (DEBUG) Serial.println("Pulse arduino not available, no BPM received");        
+    }
   }
   delay(100);
 }
