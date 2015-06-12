@@ -1,5 +1,7 @@
 char gBTAdr[13];
 char gBtCmd[256];
+// BT return message
+char gBtMsg[256];
 
 void BtReceive(void) {
   bool keepReading = true;

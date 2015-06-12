@@ -42,8 +42,6 @@ int sdCSPin = 10;
 // global time variables to be set by RTC
 tmElements_t time;
 
-// BT return message
-char gBtMsg[256];
 
 unsigned long triggerMillis = 0;
 unsigned long btMillis = 0;
@@ -83,6 +81,9 @@ void loop()
   unsigned long currentMillis = millis();
 
   if ((currentMillis - btMillis) > 10000) {
+    String fn;
+    byte a[64];
+    int i=0;
     btMillis = currentMillis;
     if (Serial.available() > 0) {
       while(Serial.available()>0) Serial.read(); // discard everything incoming, we are connected
@@ -93,19 +94,40 @@ void loop()
       File entry = root.openNextFile();
       while (entry) {
         if (!entry.isDirectory()) {
-          Serial.print("Filename: ");
-          Serial.print(entry.name());
-          Serial.print("-end");
-          delay(100);
+          fn = entry.name();
+          if ((fn.indexOf(".JPG") >= 0) || fn == "PULSE.TXT" || fn == "LOG.TXT") {
+            Serial.print("$HSFile:");
+            Serial.print(fn);
+            Serial.print("|");
+            Serial.print(entry.size());
+            Serial.print("-end");
+            delay(100);
+            i = 0;
+            while (entry.available() > 0) {
+              if (i > 63) {
+                i = 0;
+                Serial.write(a, 64);
+                delayMicroseconds(100); 
+              }
+              else {
+                a[i++] = entry.read();
+                delayMicroseconds(100); 
+              }
+            }
+            Serial.write(a, i);
+          }
+          else {
+            // no file of ours, jus let it go...
+          }
+            
         }
         else {
-          Serial.print("DIR: ");
-          Serial.print(entry.name());
-          Serial.print("-end");
-          delay(100);
+          // direcotry, dont follow
         }
         entry.close();
         entry = root.openNextFile();
+        fn.toCharArray(filename,12);
+        SD.remove(filename);
       }
       root.close();
     Serial.print("$HSEnd-end");
