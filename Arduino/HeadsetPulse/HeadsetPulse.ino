@@ -40,7 +40,6 @@ void setup(){
 void loop()
 {
   delay(300);
-  if (QS) Serial.print(" " + String(BPM));
 }
 
 // function that executes whenever data is requested by master
