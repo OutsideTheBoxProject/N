@@ -7,6 +7,7 @@ from PIL import Image
 
 # local imports
 import constants as con
+import logging as log
 
 # global variables
 running = 0
@@ -30,18 +31,16 @@ def display_bpms():
 	# fake some random data 
 	pulsedata = random.sample(range(50, 220), random.randint(1,30))
 	bpm = numpy.mean(pulsedata)
-	font = pygame.font.SysFont("monospace", 25)
-	bpmText = font.render("{0:.2f}".format(round(bpm,2)) + " bpm", 1, con.LINECOLOUR)
-	screen.blit(bpmText, (40, 10))
-	prevx = 0
-	prevy = 40
+	font = pygame.font.Font(con.FONT, 25)
+	bpmText = font.render("{0:}".format(int(round(bpm,2))) + " bpm", 1, con.LINECOLOUR)
+	screen.blit(bpmText, (con.SCREENWIDTH/15, 10))
 	for y in range(60, con.SCREENHEIGHT):
-		x = int((con.SCREENWIDTH/9) + con.AMPLITUDE * math.sin((bpm * .1) * ((float(y)/con.SCREENHEIGHT) * (2*math.pi) + (con.SPEED * time.time()))))
+		x = int((con.SCREENWIDTH/9) + con.AMPLITUDE * math.sin((bpm * .05) * ((float(y)/con.SCREENHEIGHT) * (2*math.pi) + (con.SPEED * time.time()))))
 		screen.set_at((x,y), con.LINECOLOUR)
-		#if not prevx == 0:
-		#	pygame.draw.line(screen, con.RED, (prevx, prevy), (x,y), con.LINEWIDTH)
-		#prevx = x
-		#prevy = y
+		screen.set_at((x,y+1), con.LINECOLOUR)
+		screen.set_at((x,y-1), con.LINECOLOUR)
+		screen.set_at((x+1,y), con.LINECOLOUR)
+		screen.set_at((x-1,y), con.LINECOLOUR)
 	pygame.display.flip()
 	
 	
@@ -135,8 +134,8 @@ def perform_sweep():
 		to = int((todaydays - sweepdata[key][1])%con.SWEEPTIME)
 		maxpics = int( (1/(2**to)) * sweepdata[key][0])
 		curpics = get_dir_content(key)
-		if len(curpics) > maxpics:
-			todelete = len(curpics) - maxpics
+		todelete = len(curpics) - maxpics
+		if todelete > 0:
 			deletefiles = []
 			indices = random.sample(range(0,len(curpics)), todelete)
 			for ind in indices:
@@ -153,15 +152,21 @@ def perform_sweep():
 					if not os.path.exists(mfolder):
 						os.makedirs(mfolder)
 					os.rename(key + f, mfolder + "/" + f)
+			if con.LOGGING:
+				log.log_picture_deletion(key + f)
 			if len(get_dir_content(key)) == 0:
 				os.rmdir(key)
 	
 
 # main function
 def main():
+	if con.LOGGING:
+		log.log_start_station()
 	play_recent_files(con.PICS)
 	perform_sweep()
 	while True:
+		if con.LOGGING:
+			log.log_picture_cycle()
 		play_all_files(con.PICS)
 		
 # initialise screen

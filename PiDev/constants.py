@@ -1,6 +1,4 @@
-PICS = "./testpics/"
-
-SCREENHEIGHT = 600
+SCREENHEIGHT = 592
 SCREENWIDTH = 1024
 
 WAITTIME = 3000  
@@ -23,3 +21,12 @@ MOVE = 1
 DELETE = 2
 SWEEPMODE = PRINT
 MOVEFOLDER = "./deletedpics/"
+
+FONT = "./AblePro.otf"
+
+LOGGING = 1
+BPM = "./BPM/"
+PICS = "./testpics/"
+STATIONLOG = "./stationlog.csv"
+
+

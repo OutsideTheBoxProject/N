@@ -24,22 +24,24 @@ void setupRTC() {
       config = true;
     }
   }
-
-  if (parse && config) {
-    Serial.print("DS1307 configured Time=");
-    Serial.print(__TIME__);
-    Serial.print(", Date=");
-    Serial.println(__DATE__);
-  } else if (parse) {
-    Serial.println("DS1307 Communication Error :-{");
-    Serial.println("Please check your circuitry");
-  } else {
-    Serial.print("Could not parse info from the compiler, Time=\"");
-    Serial.print(__TIME__);
-    Serial.print("\", Date=\"");
-    Serial.print(__DATE__);
-    Serial.println("\"");
-  }
+  if (DEBUG) {
+    if (parse && config) {
+      Serial.print("DS1307 configured Time=");
+      Serial.print(__TIME__);
+      Serial.print(", Date=");
+      Serial.println(__DATE__);
+    } else 
+      if (parse) {
+        Serial.println("DS1307 Communication Error :-");
+        Serial.println("Please check your circuitry");
+      } else {
+        Serial.print("Could not parse info from the compiler, Time=\"");
+        Serial.print(__TIME__);
+        Serial.print("\", Date=\"");
+        Serial.print(__DATE__);
+        Serial.println("\"");
+      }
+   }
 }
 
 bool getTime(const char *str)
