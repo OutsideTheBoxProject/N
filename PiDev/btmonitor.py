@@ -6,10 +6,30 @@ port = 1
 sock=bluetooth.BluetoothSocket( bluetooth.RFCOMM )
 sock.connect((bd_addr, port))
 print 'Connected'
+sock.send('GO') 		
 
-data = 'a'
-while data!='':
-	data = sock.recv(1)
-	print '%s'%data
+command = '' 
+buf = ''
+data = ''
 
+while command!='$HSEnd':
+	buf = ''
+	while buf.find('-end') == -1:
+		data = ''
+		data = sock.recv(1024)
+		buf = buf + data
+	if buf.find('$HSStart') != -1:
+		command = '$HSStart'
+	if buf.find('$HSEnd') != -1:
+		command = '$HSEnd'
+	if buf.find('$HSFile:') != -1:
+		filename = buf[8:buf.find('-end')]
+		print filename
+#		f = open('import/' + filename, 'w');
+		
+
+#	print "buf: [%s]" % buf
+
+
+print 'Connection closed'
 sock.close()
