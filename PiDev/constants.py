@@ -6,14 +6,15 @@ WAITTIME = 3000
 PICTUREHEIGHT = 600
 PICTUREWIDTH = 800
 
-LINECOLOUR = (255, 0, 0)
+LINECOLOUR = (226, 0, 89)
 BACKGROUNDCOLOUR = (0, 0, 0)
 LINEWIDTH = 2
+IMPORTCOLOUR = (238, 127, 0)
 
 AMPLITUDE = 90
 SPEED = 1
 
-SWEEPFILE = "./tempSweepFile.txt"
+SWEEPFILE = "./sweepFile.txt"
 # in tagen
 SWEEPTIME = 7
 PRINT = 0
@@ -26,7 +27,7 @@ FONT = "./AblePro.otf"
 
 LOGGING = 1
 BPM = "./BPM/"
-PICS = "./testpics/"
+PICS = "./pics/"
 STATIONLOG = "./stationlog.csv"
 
 

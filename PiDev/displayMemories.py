@@ -8,9 +8,12 @@ from PIL import Image
 # local imports
 import constants as con
 import logging as log
+import fileImport as fi
 
 # global variables
 running = 0
+pause = False
+imported = False
 
 # implementation
 
@@ -48,11 +51,11 @@ def display_bpms():
 
 # actually show the pics
 def perform_pic_loop(pics):
-	global running, screen
+	global running, screen, pause
 	i = 0
 	while True:
 		# display pic
-		if running == 0 or (pygame.time.get_ticks() - running) > con.WAITTIME:
+		if (running == 0 or (pygame.time.get_ticks() - running) > con.WAITTIME) and not pause:
 			screen.fill(con.BACKGROUNDCOLOUR)
 			screen.blit(pygame.image.load(pics[i]), ((con.SCREENWIDTH - con.PICTUREWIDTH), 0))
 			pygame.display.flip()
@@ -68,6 +71,14 @@ def perform_pic_loop(pics):
 				if event.key == pygame.K_ESCAPE:
 					print "Goodbye."
 					exit()
+					
+				# pause button until we have a real one
+				if event.key == pygame.K_p:
+					# do stuff
+					if pause:
+						pause = False
+					else:
+						pause = True
 	
 
 
@@ -77,7 +88,8 @@ def play_recent_files(filedir):
 	rawPics = get_dir_content(filedir + recent)
 	pics = []
 	for pic in rawPics:
-		pics.append(filedir + recent + "/" + pic)
+		if "JPG" in pic:
+			pics.append(filedir + recent + "/" + pic)
 	perform_pic_loop(pics)
 	
 
@@ -89,7 +101,8 @@ def play_all_files(filedir):
 	for folder in folders:
 		rawPics = get_dir_content(filedir + folder)
 		for pic in rawPics:
-			pics.append(filedir + folder + "/" + pic)
+			if "JPG" in pic:
+				pics.append(filedir + folder + "/" + pic)
 	perform_pic_loop(pics)
 
 # returns the correct number of days happened in that year up to the month given
@@ -122,6 +135,8 @@ def get_sweep_data():
 	sweeps = {}
 	for line in sweeplines:
 		linecontent = line.split(", ")
+		print linecontent
+		print len(linecontent)
 		sweeps[linecontent[0]] = [int(linecontent[1]), get_days(linecontent[2])]
 	return sweeps
 
@@ -131,15 +146,19 @@ def perform_sweep():
 	sweepdata = get_sweep_data()
 	todaydays = get_days(time.strftime("%Y-%m-%d"))
 	for key in sweepdata.keys():
-		to = int((todaydays - sweepdata[key][1])%con.SWEEPTIME)
+		to = int((todaydays - sweepdata[key][1])//con.SWEEPTIME)
 		maxpics = int( (1/(2**to)) * sweepdata[key][0])
 		curpics = get_dir_content(key)
-		todelete = len(curpics) - maxpics
+		picpics = []
+		for potpic in curpics:
+			if "JPG" in potpic:
+				picpics.append(potpic)
+		todelete = len(picpics) - maxpics
 		if todelete > 0:
 			deletefiles = []
-			indices = random.sample(range(0,len(curpics)), todelete)
+			indices = random.sample(range(0,len(picpics)), todelete)
 			for ind in indices:
-				deletefiles.append(curpics[ind])
+				deletefiles.append(picpics[ind])
 			if con.SWEEPMODE == con.PRINT:
 				for f in deletefiles:
 					print "would remove file " + key + f
@@ -156,17 +175,59 @@ def perform_sweep():
 				log.log_picture_deletion(key + f)
 			if len(get_dir_content(key)) == 0:
 				os.rmdir(key)
+
+# writes sweep information into the sweepfile
+def write_sweep(folder, file_number, timestamp):	
+	with open(con.SWEEPFILE, "a") as f:
+		f.write(str(folder) + ", " + str(file_number) + ", " + timestamp + "\n" )
+
+# updates the sweepfile so we know what to do later
+def update_sweepfile():
+	folder = get_dir_content(con.PICS)[-1]
+	contents = get_dir_content(con.PICS + folder)
+	file_number = len(content) - 2
+	timestamp = log.get_date_timestamp()
+	write_sweep(folder, file_number, timestamp)
 	
+
+# display that we import files
+def display_import_files():
+	global screen
+	screen.fill(con.BACKGROUNDCOLOUR)	
+	font = pygame.font.Font(con.FONT, 50)
+	bpmText = font.render("Bitte kurz warten,", 1, con.IMPORTCOLOUR)
+	screen.blit(bpmText, (con.SCREENWIDTH/3.1, con.SCREENHEIGHT/2 - 125))
+	bpmText = font.render("ich hole mir neue Bilder", 1, con.IMPORTCOLOUR)
+	screen.blit(bpmText, (con.SCREENWIDTH/3.55, con.SCREENHEIGHT/2 - 25))
+	bpmText = font.render("aus der Denkmaschine.", 1, con.IMPORTCOLOUR)
+	screen.blit(bpmText, (con.SCREENWIDTH/3.5, con.SCREENHEIGHT/2 + 75))
+	pygame.display.flip()
+
+# checks for file import and does so, if there is a connection
+def check_import():
+	global imported
+	if fi.test_connection():
+		if con.LOGGING:
+			log.log_data_transfer_start()
+		display_import_files()
+		fi.get_files_from_headband()
+		update_sweepfile()
+		imported = True
+		if con.LOGGING:
+			log.log_data_transfer_finish()	
 
 # main function
 def main():
 	if con.LOGGING:
 		log.log_start_station()
-	play_recent_files(con.PICS)
+	check_import()
+	#play_recent_files(con.PICS)
 	perform_sweep()
 	while True:
 		if con.LOGGING:
 			log.log_picture_cycle()
+		if not imported:
+			check_import()
 		play_all_files(con.PICS)
 		
 # initialise screen

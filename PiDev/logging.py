@@ -28,6 +28,10 @@ def update_picture_filename(filename, pfilename):
 # get the correctly formatted timestamp for the local time	
 def get_cur_timestamp():
 	return time.strftime("%Y-%m-%d %H:%M:%S")
+
+# returns the correctlz formatted timestamp for the day
+def get_date_timestamp():
+	return time.strftime("%Y-%m-%d")
 	
 # formats the info with timestamp and delimiter
 def get_line(info, detail=""):
@@ -63,3 +67,4 @@ def log_data_transfer_finish(numbites):
 # logs new cycle of showing pictures
 def log_picture_cycle():
 	append_line(con.STATIONLOG, get_line("showing all pictures"))
+
