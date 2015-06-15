@@ -72,8 +72,9 @@ void setup()
   delay(3000);
   SetImageSizeCmd(0x1D);
   delay(100);
-  SetBaudRateCmd(0x0D);
+  SetBaudRateCmd(0x1C);
   delay(200);  
+  camSerial.begin(57600);
 }
  
 void loop()
