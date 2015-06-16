@@ -10,6 +10,7 @@ sock=bluetooth.BluetoothSocket( bluetooth.RFCOMM )
 # returns true or false according to connection
 def test_connection():
 	global sock
+	sock = bluetooth.BluetoothSocket( bluetooth.RFCOMM )
 	bd_addr = "00:06:66:74:81:23" #Headband address
 	port = 1
 	try:

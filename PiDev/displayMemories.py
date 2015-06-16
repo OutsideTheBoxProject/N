@@ -261,10 +261,37 @@ def display_import_files():
 	bpmText = font.render("aus der Denkmaschine.", 1, con.IMPORTCOLOUR)
 	screen.blit(bpmText, (con.SCREENWIDTH/3.5, con.SCREENHEIGHT/2 + 75))
 	pygame.display.flip()
+	for event in pygame.event.get():
+		#exit
+		if event.type == pygame.KEYDOWN:
+			if event.key == pygame.K_ESCAPE:
+				print "Goodbye."
+				exit()
+	
+# just so it's not confusing during timeout	
+def display_checking_import():
+	global screen
+	screen.fill(con.BACKGROUNDCOLOUR)	
+	font = pygame.font.Font(con.FONT, 50)
+	bpmText = font.render("Bitte kurz warten,", 1, con.IMPORTCOLOUR)
+	screen.blit(bpmText, (con.SCREENWIDTH/3.1, con.SCREENHEIGHT/2 - 125))
+	bpmText = font.render("ich schaue nach, ob ich", 1, con.IMPORTCOLOUR)
+	screen.blit(bpmText, (con.SCREENWIDTH/3.5, con.SCREENHEIGHT/2 - 25))
+	bpmText = font.render("neue Bilder finden kann.", 1, con.IMPORTCOLOUR)
+	screen.blit(bpmText, (con.SCREENWIDTH/3.5, con.SCREENHEIGHT/2 + 75))
+	pygame.display.flip()
+	for event in pygame.event.get():
+		#exit
+		if event.type == pygame.KEYDOWN:
+			if event.key == pygame.K_ESCAPE:
+				print "Goodbye."
+				exit()
 
 # checks for file import and does so, if there is a connection
-def check_import():
+def check_import(withDisplay):
 	global imported
+	if withDisplay:
+		display_checking_import()
 	if fi.test_connection():
 		if con.LOGGING:
 			log.log_data_transfer_start()
@@ -283,37 +310,37 @@ def display_no_pictures():
     bpmText = font.render("Ich habe noch keine Bilder.", 1, con.IMPORTCOLOUR)
     screen.blit(bpmText, (con.SCREENWIDTH/4, con.SCREENHEIGHT/2 - 125))
     bpmText = font.render("Bitte mach doch erst ein paar", 1, con.IMPORTCOLOUR)
-    screen.blit(bpmText, (con.SCREENWIDTH/4.55, con.SCREENHEIGHT/2 - 25))
+    screen.blit(bpmText, (con.SCREENWIDTH/4.5	, con.SCREENHEIGHT/2 - 25))
     bpmText = font.render("mit deiner Denkmaschine.", 1, con.IMPORTCOLOUR)
-    screen.blit(bpmText, (con.SCREENWIDTH/4.5, con.SCREENHEIGHT/2 + 75))
+    screen.blit(bpmText, (con.SCREENWIDTH/3.8, con.SCREENHEIGHT/2 + 75))
     pygame.display.flip()
     for event in pygame.event.get():
-        #exit
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_ESCAPE:
-                print "Goodbye."
-                    exit()
+		if event.type == pygame.KEYDOWN:
+			if event.key == pygame.K_ESCAPE:
+				print "Goodbye."
+				exit()
 
 
 # main function
 def main():
 	if con.LOGGING:
 		log.log_start_station()
-	check_import()
-    if len(get_dir_content(con.PICS)) > 0:
-        play_recent_files(con.PICS)
-        perform_sweep()
-    else:
-        log.log_no_pictures()
+	check_import(True)
+	if len(get_dir_content(con.PICS)) > 0:
+		play_recent_files(con.PICS)
+		perform_sweep()
+	else:
+		log.log_no_pictures()
 	while True:
 		if con.LOGGING:
 			log.log_picture_cycle()
+		if len(get_dir_content(con.PICS)) > 0:
+			print get_dir_content(con.PICS)
+			play_all_files(con.PICS)
+		else:
+			display_no_pictures()
 		if not imported:
-			check_import()
-        if len(get_dir_content(con.PICS)) > 0:
-            play_all_files(con.PICS)
-        else:
-            display_no_pictures()
+			check_import(False)
 		
 # initialise screen
 pygame.init()
