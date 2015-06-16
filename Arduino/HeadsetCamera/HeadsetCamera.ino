@@ -4,7 +4,7 @@
  @created 27 May 2015
 
  Wiring
- D4  Detect File Translation mode (High = BaseStation / Low = PictureMode)
+ D4  Detect Mode (Low = BaseStation / High = PictureMode)
  D5  Camera TX    // Camera SoftwareSerial
  D6  Camera RX
  D10 SD CS        // SD Card SPI 
@@ -65,10 +65,10 @@ void setup()
   setupRTC();
   
   // setup BT
-  Serial.print("$$$");
-  Serial.println("SI,0000");  // disable discovery mode to save energy
-  Serial.println("SW,8320");  // enable deep slepp with 0.5sec sniff 
-  Serial.println("---");
+//  Serial.print("$$$");
+//  Serial.println("SI,0000");  // disable discovery mode to save energy
+//  Serial.println("SW,8320");  // enable deep slepp with 0.5sec sniff 
+//  Serial.println("---");
    
   // init Camera
   camSerial.begin(115200);
@@ -81,8 +81,7 @@ void setup()
   delay(200);  
   camSerial.begin(57600);
   
-  // prepare mode pin
-  pinMode(modePin, INPUT);      // sets the digital pin 7 as input
+  pinMode(modePin, INPUT);
   
 }
  
@@ -90,14 +89,14 @@ void loop()
 {
   unsigned long currentMillis = millis();
 
-  if (digitalRead(modePin) == HIGH) {
+  if (digitalRead(modePin) == HIGH) { // if this is 0, its picture mode - if it is high, its BT mode
     String fn;
     byte a[64];
     int i=0;
     
     //wake up BT
-    Serial.print("$");
-    delay(100);
+//    Serial.print("$");
+//    delay(100);
     
     if (Serial.available() > 0) {
       while(Serial.available()>0) Serial.read(); // discard everything incoming, we are connected
