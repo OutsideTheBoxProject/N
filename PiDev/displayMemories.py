@@ -273,21 +273,47 @@ def check_import():
 		update_sweepfile()
 		imported = True
 		if con.LOGGING:
-			log.log_data_transfer_finish()	
+			log.log_data_transfer_finish()
+
+
+def display_no_pictures():
+    global screen
+    screen.fill(con.BACKGROUNDCOLOUR)
+    font = pygame.font.Font(con.FONT, 50)
+    bpmText = font.render("Ich habe noch keine Bilder.", 1, con.IMPORTCOLOUR)
+    screen.blit(bpmText, (con.SCREENWIDTH/4, con.SCREENHEIGHT/2 - 125))
+    bpmText = font.render("Bitte mach doch erst ein paar", 1, con.IMPORTCOLOUR)
+    screen.blit(bpmText, (con.SCREENWIDTH/4.55, con.SCREENHEIGHT/2 - 25))
+    bpmText = font.render("mit deiner Denkmaschine.", 1, con.IMPORTCOLOUR)
+    screen.blit(bpmText, (con.SCREENWIDTH/4.5, con.SCREENHEIGHT/2 + 75))
+    pygame.display.flip()
+    for event in pygame.event.get():
+        #exit
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                print "Goodbye."
+                    exit()
+
 
 # main function
 def main():
 	if con.LOGGING:
 		log.log_start_station()
 	check_import()
-	play_recent_files(con.PICS)
-	perform_sweep()
+    if len(get_dir_content(con.PICS)) > 0:
+        play_recent_files(con.PICS)
+        perform_sweep()
+    else:
+        log.log_no_pictures()
 	while True:
 		if con.LOGGING:
 			log.log_picture_cycle()
 		if not imported:
 			check_import()
-		play_all_files(con.PICS)
+        if len(get_dir_content(con.PICS)) > 0:
+            play_all_files(con.PICS)
+        else:
+            display_no_pictures()
 		
 # initialise screen
 pygame.init()

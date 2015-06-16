@@ -68,3 +68,7 @@ def log_data_transfer_finish(numbites):
 def log_picture_cycle():
 	append_line(con.STATIONLOG, get_line("showing all pictures"))
 
+# logs the case that there are no pictures to be found, if that is the case
+def log_no_pictures():
+    append_line(con.STATIONLOG, get_line("no pictures to be found"))
+
