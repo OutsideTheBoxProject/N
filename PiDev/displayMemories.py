@@ -1,5 +1,5 @@
 # global imports
-import os, random, numpy, time, math
+import os, random, numpy, time, math, collections
 import pygame
 from pygame.locals import *
 import PIL
@@ -53,6 +53,7 @@ def display_bpms():
 def perform_pic_loop(pics):
 	global running, screen, pause
 	i = 0
+	print pics
 	while True:
 		# display pic
 		if (running == 0 or (pygame.time.get_ticks() - running) > con.WAITTIME) and not pause:
@@ -81,15 +82,27 @@ def perform_pic_loop(pics):
 						pause = True
 	
 
+# because sorting might not be enough,
+# we need to play the pictures in the right order.
+# returns a mapping of timestamps and filenames
+def get_order_of_pictures(foldername):
+	piclog = {}
+	loglines = get_lines(foldername + con.PICLOG)
+	for line in loglines:
+		data = line.split(",")
+		piclog[data[0]] = data[1].strip().upper()
+	piclog = collections.OrderedDict(sorted(piclog.items()))
+	return piclog
+
 
 # play only recent files
 def play_recent_files(filedir):
 	recent = get_dir_content(filedir)[-1]
-	rawPics = get_dir_content(filedir + recent)
+	rawPics = get_order_of_pictures(filedir + recent + "/")
 	pics = []
-	for pic in rawPics:
-		if "JPG" in pic:
-			pics.append(filedir + recent + "/" + pic)
+	for key in rawPics.keys():
+		if "JPG" in rawPics[key]:
+			pics.append(filedir + recent + "/" + rawPics[key])
 	perform_pic_loop(pics)
 	
 
@@ -99,10 +112,10 @@ def play_all_files(filedir):
 	folders = get_dir_content(filedir)
 	pics = []
 	for folder in folders:
-		rawPics = get_dir_content(filedir + folder)
-		for pic in rawPics:
-			if "JPG" in pic:
-				pics.append(filedir + folder + "/" + pic)
+		rawPics = get_order_of_pictures(filedir + folder + "/")
+		for key in rawPics.keys():
+			if "JPG" in rawPics[key]:
+				pics.append(filedir + folder + "/" + rawPics[key])
 	perform_pic_loop(pics)
 
 # returns the correct number of days happened in that year up to the month given
@@ -221,7 +234,7 @@ def main():
 	if con.LOGGING:
 		log.log_start_station()
 	check_import()
-	#play_recent_files(con.PICS)
+	play_recent_files(con.PICS)
 	perform_sweep()
 	while True:
 		if con.LOGGING:

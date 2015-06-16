@@ -29,5 +29,5 @@ LOGGING = 1
 BPM = "./BPM/"
 PICS = "./pics/"
 STATIONLOG = "./stationlog.csv"
-
+PICLOG = "LOG.TXT"
 
