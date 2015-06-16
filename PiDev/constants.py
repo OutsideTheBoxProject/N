@@ -30,4 +30,5 @@ BPM = "./BPM/"
 PICS = "./pics/"
 STATIONLOG = "./stationlog.csv"
 PICLOG = "LOG.TXT"
+PULSELOG = "PULSE.TXT"
 

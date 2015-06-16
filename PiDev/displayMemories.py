@@ -28,13 +28,64 @@ def get_lines(textfile):
 	with open(textfile) as f:
 		return f.readlines()
 	
+# create a dictionary holding the bpm 	
+def get_bpm_dictionary(foldername):
+	bpms = {}
+	pulselines = get_lines(foldername + con.PULSELOG)
+	lastStamp = ""
+	pulses = []
+	for line in pulselines:
+		data = line.split(",")
+		if not len(lastStamp) == 0 and not lastStamp == data[0]:
+			bpms[lastStamp] = numpy.mean(pulses)
+			pulses = []
+		lastStamp = data[0]	
+		pulses.append(int(data[1]))
+	bpms = collections.OrderedDict(sorted(bpms.items()))
+	return bpms
+	
+
+# get the correct bpm value for the picture
+def get_pulsedata(pics, i, bpms):
+	if len(bpms) == 0:
+		return 0.0
+	beats = []
+	stamp = pics.keys()[i]
+	if i == 0:
+		if bpms.keys()[i] > stamp :
+			return float(bpms[bpms.keys()[i]])
+		else:
+			for key in bpms.keys():
+				if key > stamp:
+					return float(numpy.mean(beats))
+				else:
+					beats.append(bpms[key])
+	else:
+		prevStamp = pics.keys()[i-1]
+		potBpm = 0
+		for key in bpms.keys():
+			if key > prevStamp and stamp >= key:
+				beats.append(bpms[key])
+		if len(beats) > 0:
+			return float(numpy.mean(beats))
+		else:
+			for key in bpms.keys():
+				if stamp > key:
+					potBpm = bpms[key]
+				else:
+					if potBpm > 0:
+						return float(potBpm)
+					else:
+						return float(bpms[bpms.keys()[0]])
+	return float(bpms[bpms.keys()[-1]])		
+
 		
-# temporary solution, but will display some bpm data for now
-def display_bpms():
-	# fake some random data 
-	pulsedata = random.sample(range(50, 220), random.randint(1,30))
-	bpm = numpy.mean(pulsedata)
+# displays bpm data for now
+def display_bpms(pics, i, bpms):
+	bpm = get_pulsedata(pics, i, bpms)
 	font = pygame.font.Font(con.FONT, 25)
+	print bpm
+	print type(bpm)
 	bpmText = font.render("{0:}".format(int(round(bpm,2))) + " bpm", 1, con.LINECOLOUR)
 	screen.blit(bpmText, (con.SCREENWIDTH/15, 10))
 	for y in range(60, con.SCREENHEIGHT):
@@ -50,18 +101,20 @@ def display_bpms():
 
 
 # actually show the pics
-def perform_pic_loop(pics):
+def perform_pic_loop(foldername, pics):
 	global running, screen, pause
 	i = 0
+	bpms = get_bpm_dictionary(foldername)
 	print pics
+	print bpms
 	while True:
 		# display pic
 		if (running == 0 or (pygame.time.get_ticks() - running) > con.WAITTIME) and not pause:
 			screen.fill(con.BACKGROUNDCOLOUR)
-			screen.blit(pygame.image.load(pics[i]), ((con.SCREENWIDTH - con.PICTUREWIDTH), 0))
+			screen.blit(pygame.image.load(foldername + pics[pics.keys()[i]]), ((con.SCREENWIDTH - con.PICTUREWIDTH), 0))
 			pygame.display.flip()
 			running = pygame.time.get_ticks()
-			display_bpms()
+			display_bpms(pics, i, bpms)
 			i = i + 1
 			if i >= len(pics):
 				break 
@@ -99,11 +152,7 @@ def get_order_of_pictures(foldername):
 def play_recent_files(filedir):
 	recent = get_dir_content(filedir)[-1]
 	rawPics = get_order_of_pictures(filedir + recent + "/")
-	pics = []
-	for key in rawPics.keys():
-		if "JPG" in rawPics[key]:
-			pics.append(filedir + recent + "/" + rawPics[key])
-	perform_pic_loop(pics)
+	perform_pic_loop(filedir + recent + "/", rawPics)
 	
 
 
@@ -113,10 +162,7 @@ def play_all_files(filedir):
 	pics = []
 	for folder in folders:
 		rawPics = get_order_of_pictures(filedir + folder + "/")
-		for key in rawPics.keys():
-			if "JPG" in rawPics[key]:
-				pics.append(filedir + folder + "/" + rawPics[key])
-	perform_pic_loop(pics)
+		perform_pic_loop(filedir + folder + "/", rawPics)
 
 # returns the correct number of days happened in that year up to the month given
 def get_days_for_month(month):
