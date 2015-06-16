@@ -4,6 +4,7 @@
  @created 27 May 2015
 
  Wiring
+ D4  Detect File Translation mode (High = BaseStation / Low = PictureMode)
  D5  Camera TX    // Camera SoftwareSerial
  D6  Camera RX
  D10 SD CS        // SD Card SPI 
@@ -38,13 +39,14 @@ File  picFile;      // file for pictures
 char filename[12];  // filename
 int picindex = 0;
 int sdCSPin = 10;
+int modePin = 4;
+
 
 // global time variables to be set by RTC
 tmElements_t time;
 
 
 unsigned long triggerMillis = 0;
-unsigned long btMillis = 0;
 
 File logFile;
  
@@ -63,7 +65,10 @@ void setup()
   setupRTC();
   
   // setup BT
-//  setupBt();
+  Serial.print("$$$");
+  Serial.println("SI,0000");  // disable discovery mode to save energy
+  Serial.println("SW,8320");  // enable deep slepp with 0.5sec sniff 
+  Serial.println("---");
    
   // init Camera
   camSerial.begin(115200);
@@ -75,17 +80,25 @@ void setup()
   SetBaudRateCmd(0x1C);
   delay(200);  
   camSerial.begin(57600);
+  
+  // prepare mode pin
+  pinMode(modePin, INPUT);      // sets the digital pin 7 as input
+  
 }
  
 void loop()
 {
   unsigned long currentMillis = millis();
 
-  if ((currentMillis - btMillis) > 10000) {
+  if (digitalRead(modePin) == HIGH) {
     String fn;
     byte a[64];
     int i=0;
-    btMillis = currentMillis;
+    
+    //wake up BT
+    Serial.print("$");
+    delay(100);
+    
     if (Serial.available() > 0) {
       while(Serial.available()>0) Serial.read(); // discard everything incoming, we are connected
       Serial.print("$HSStart-end");  
@@ -131,9 +144,10 @@ void loop()
         SD.remove(filename);
       }
       root.close();
-    Serial.print("$HSEnd-end");
-    delay(100);
+      Serial.print("$HSEnd-end");
+      delay(100);
     }
+    delay(500);
   }
   else {
     
