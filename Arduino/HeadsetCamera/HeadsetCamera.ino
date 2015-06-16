@@ -15,6 +15,8 @@
  A5  clk, SCL -> HeadbandPulse arduino A5 / RTC SCL
  
  Bluetooth SilverMate on UART
+ 
+ Note: power consumption of camer is currently 0.5A... 
 
 *******************************************************
 */
