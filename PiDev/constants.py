@@ -14,21 +14,23 @@ IMPORTCOLOUR = (238, 127, 0)
 AMPLITUDE = 90
 SPEED = 1
 
-SWEEPFILE = "./sweepFile.txt"
+LOCAL_DIR = "/home/pi/OutsideTheBox/N/PiDev/"
+
+SWEEPFILE = LOCAL_DIR + "sweepFile.txt"
 # in tagen
 SWEEPTIME = 7
 PRINT = 0
 MOVE = 1
 DELETE = 2
 SWEEPMODE = PRINT
-MOVEFOLDER = "./deletedpics/"
+MOVEFOLDER = LOCAL_DIR + "deletedpics/"
 
-FONT = "./AblePro.otf"
+FONT = LOCAL_DIR + "AblePro.otf"
 
 LOGGING = 1
-BPM = "./BPM/"
-PICS = "./pics/"
-STATIONLOG = "./stationlog.csv"
+BPM = LOCAL_DIR + "BPM/"
+PICS = LOCAL_DIR + "pics/"
+STATIONLOG = LOCAL_DIR + "stationlog.csv"
 PICLOG = "LOG.TXT"
 PULSELOG = "PULSE.TXT"
 

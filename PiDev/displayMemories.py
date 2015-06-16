@@ -4,6 +4,7 @@ import pygame
 from pygame.locals import *
 import PIL
 from PIL import Image
+from signal import alarm, signal, SIGALRM, SIGKILL
 
 # local imports
 import constants as con
@@ -14,6 +15,7 @@ import fileImport as fi
 running = 0
 pause = False
 imported = False
+screen = None
 
 # implementation
 
@@ -84,8 +86,6 @@ def get_pulsedata(pics, i, bpms):
 def display_bpms(pics, i, bpms):
 	bpm = get_pulsedata(pics, i, bpms)
 	font = pygame.font.Font(con.FONT, 25)
-	print bpm
-	print type(bpm)
 	bpmText = font.render("{0:}".format(int(round(bpm,2))) + " bpm", 1, con.LINECOLOUR)
 	screen.blit(bpmText, (con.SCREENWIDTH/15, 10))
 	for y in range(60, con.SCREENHEIGHT):
@@ -105,8 +105,6 @@ def perform_pic_loop(foldername, pics):
 	global running, screen, pause
 	i = 0
 	bpms = get_bpm_dictionary(foldername)
-	print pics
-	print bpms
 	while True:
 		# display pic
 		if (running == 0 or (pygame.time.get_ticks() - running) > con.WAITTIME) and not pause:
@@ -194,8 +192,6 @@ def get_sweep_data():
 	sweeps = {}
 	for line in sweeplines:
 		linecontent = line.split(", ")
-		print linecontent
-		print len(linecontent)
 		sweeps[linecontent[0]] = [int(linecontent[1]), get_days(linecontent[2])]
 	return sweeps
 
@@ -203,6 +199,8 @@ def get_sweep_data():
 # actually sweep pictures according to half time according to sweep mode
 def perform_sweep():
 	sweepdata = get_sweep_data()
+	if len(sweepdata) == 0:
+		return
 	todaydays = get_days(time.strftime("%Y-%m-%d"))
 	for key in sweepdata.keys():
 		to = int((todaydays - sweepdata[key][1])//con.SWEEPTIME)
@@ -320,9 +318,29 @@ def display_no_pictures():
 				print "Goodbye."
 				exit()
 
+# this is a bloody hack. 
+def init_pygame():
+	global screen
+	class Alarm(Exception):
+		pass
+	def alarm_handler(signum, frame):
+		raise Alarm
+	signal(SIGALRM, alarm_handler)
+	alarm(3)
+	try:
+		pygame.init()
+		screen = pygame.display.set_mode((con.SCREENWIDTH, con.SCREENHEIGHT), pygame.FULLSCREEN)
+		alarm(0)
+	except Alarm:
+		raise KeyboardInterrupt
+	
+	screen.fill((255, 255, 255))
+	pygame.display.flip()
+
 
 # main function
 def main():
+	init_pygame()
 	if con.LOGGING:
 		log.log_start_station()
 	check_import(True)
@@ -335,18 +353,8 @@ def main():
 		if con.LOGGING:
 			log.log_picture_cycle()
 		if len(get_dir_content(con.PICS)) > 0:
-			print get_dir_content(con.PICS)
 			play_all_files(con.PICS)
 		else:
 			display_no_pictures()
 		if not imported:
 			check_import(False)
-		
-# initialise screen
-pygame.init()
-screen = pygame.display.set_mode((con.SCREENWIDTH, con.SCREENHEIGHT), pygame.FULLSCREEN)
-screen.fill((255, 255, 255))
-pygame.display.flip()
-		
-# call to the main function
-main()
