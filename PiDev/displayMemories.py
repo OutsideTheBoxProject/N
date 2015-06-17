@@ -5,6 +5,7 @@ from pygame.locals import *
 import PIL
 from PIL import Image
 from signal import alarm, signal, SIGALRM, SIGKILL
+import RPi.GPIO as GPIO
 
 # local imports
 import constants as con
@@ -14,8 +15,8 @@ import fileImport as fi
 # global variables
 running = 0
 pause = False
-imported = False
 screen = None
+importDisplay = True
 
 # implementation
 
@@ -116,6 +117,8 @@ def perform_pic_loop(foldername, pics):
 			i = i + 1
 			if i >= len(pics):
 				break 
+			#check_import(False)
+
 		
 		for event in pygame.event.get():	
 			#exit
@@ -123,15 +126,15 @@ def perform_pic_loop(foldername, pics):
 				if event.key == pygame.K_ESCAPE:
 					print "Goodbye."
 					exit()
-					
-				# pause button until we have a real one
-				if event.key == pygame.K_p:
-					# do stuff
-					if pause:
-						pause = False
-					else:
-						pause = True
-	
+		
+		toggle = True			
+		while (GPIO.input(4)):
+			if toggle: 
+				if pause:
+					pause = False
+				else:
+					pause = True
+				toggle = False
 
 # because sorting might not be enough,
 # we need to play the pictures in the right order.
@@ -205,7 +208,7 @@ def perform_sweep():
 	for key in sweepdata.keys():
 		to = int((todaydays - sweepdata[key][1])//con.SWEEPTIME)
 		maxpics = int( (1/(2**to)) * sweepdata[key][0])
-		curpics = get_dir_content(key)
+		curpics = get_dir_content(con.PICS + key)
 		picpics = []
 		for potpic in curpics:
 			if "JPG" in potpic:
@@ -240,11 +243,17 @@ def write_sweep(folder, file_number, timestamp):
 
 # updates the sweepfile so we know what to do later
 def update_sweepfile():
-	folder = get_dir_content(con.PICS)[-1]
-	contents = get_dir_content(con.PICS + folder)
-	file_number = len(content) - 2
-	timestamp = log.get_date_timestamp()
-	write_sweep(folder, file_number, timestamp)
+	folders = get_dir_content(con.PICS)
+	folder = ""
+	if len(folders) > 0:
+		folder = get_dir_content(con.PICS)[-1]
+		contents = get_dir_content(con.PICS + folder)
+		if len(contents) == 0:
+			os.rmdir(con.PICS + folder)
+		else: 
+			file_number = len(contents) - 2
+			timestamp = log.get_date_timestamp()
+			write_sweep(folder, file_number, timestamp)
 	
 
 # display that we import files
@@ -287,17 +296,19 @@ def display_checking_import():
 
 # checks for file import and does so, if there is a connection
 def check_import(withDisplay):
-	global imported
+	global importDisplay
 	if withDisplay:
 		display_checking_import()
+	numFolders = len(get_dir_content(con.PICS))
 	if fi.test_connection():
 		if con.LOGGING:
 			log.log_data_transfer_start()
-		display_import_files()
+		if withDisplay:	
+			display_import_files()
 		fi.get_files_from_headband()
 		update_sweepfile()
-		imported = True
-		if con.LOGGING:
+		importDisplay = False
+		if con.LOGGING and numFolders < len(get_dir_content(con.PICS)):
 			log.log_data_transfer_finish()
 
 
@@ -340,10 +351,14 @@ def init_pygame():
 
 # main function
 def main():
+	global importDisplay
+	GPIO.setmode(GPIO.BCM)
+	GPIO.setup(4,GPIO.IN, pull_up_down=GPIO.PUD_DOWN)	
 	init_pygame()
+	log.append_line(con.STATIONLOG, log.get_line(str(type(screen))))
 	if con.LOGGING:
 		log.log_start_station()
-	check_import(True)
+	check_import(importDisplay)
 	if len(get_dir_content(con.PICS)) > 0:
 		play_recent_files(con.PICS)
 		perform_sweep()
@@ -354,7 +369,7 @@ def main():
 			log.log_picture_cycle()
 		if len(get_dir_content(con.PICS)) > 0:
 			play_all_files(con.PICS)
+			check_import(True)
 		else:
 			display_no_pictures()
-		if not imported:
 			check_import(False)

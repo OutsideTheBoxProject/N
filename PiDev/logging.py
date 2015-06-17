@@ -61,8 +61,8 @@ def log_data_transfer_start():
 	append_line(con.STATIONLOG, get_line("initiated data transfer"))
 
 # logs finishing the data transfer
-def log_data_transfer_finish(numbites):
-	append_line(con.STATIONLOG, get_line("data transfer finished", "transferred " + str(numbites) + " bytes"))
+def log_data_transfer_finish():
+	append_line(con.STATIONLOG, get_line("data transfer finished"))
 
 # logs new cycle of showing pictures
 def log_picture_cycle():
