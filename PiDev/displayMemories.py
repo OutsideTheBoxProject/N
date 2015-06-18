@@ -369,7 +369,7 @@ def main():
 			log.log_picture_cycle()
 		if len(get_dir_content(con.PICS)) > 0:
 			play_all_files(con.PICS)
-			check_import(True)
+			check_import(False)
 		else:
 			display_no_pictures()
 			check_import(False)
