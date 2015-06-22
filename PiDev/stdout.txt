@@ -1,0 +1,16 @@
+(103, 'Software caused connection abort')
+PULSE.TXT 3887 0.JPG 33955 LOG.TXT 104 1.JPG 34322 2.JPG 0 3.JPG 20436 4.JPG 20582 5.JPG 0 (112, 'Host is down')
+(110, 'Connection timed out')
+PULSE.TXT 1978 0.JPG 25900 LOG.TXT 103 1.JPG 25965 2.JPG 26084 3.JPG 26377 4.JPG 0 (112, 'Host is down')
+(112, 'Host is down')
+(112, 'Host is down')
+(112, 'Host is down')
+(112, 'Host is down')
+Goodbye.
+(112, 'Host is down')
+Goodbye.
+(112, 'Host is down')
+(112, 'Host is down')
+(112, 'Host is down')
+(112, 'Host is down')
+Goodbye.

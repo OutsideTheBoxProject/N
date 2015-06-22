@@ -1,5 +1,5 @@
 # global imports
-import os, random, numpy, time, math, collections
+import os, random, numpy, time, math, collections, shutil
 import pygame
 from pygame.locals import *
 import PIL
@@ -108,7 +108,7 @@ def perform_pic_loop(foldername, pics):
 	bpms = get_bpm_dictionary(foldername)
 	while True:
 		# display pic
-		if (running == 0 or (pygame.time.get_ticks() - running) > con.WAITTIME) and not pause:
+		if (running == 0 or (pygame.time.get_ticks() - running) > con.WAITTIME) and (len(pics) > 0) and not pause:
 			screen.fill(con.BACKGROUNDCOLOUR)
 			screen.blit(pygame.image.load(foldername + pics[pics.keys()[i]]), ((con.SCREENWIDTH - con.PICTUREWIDTH), 0))
 			pygame.display.flip()
@@ -141,11 +141,12 @@ def perform_pic_loop(foldername, pics):
 # returns a mapping of timestamps and filenames
 def get_order_of_pictures(foldername):
 	piclog = {}
-	loglines = get_lines(foldername + con.PICLOG)
-	for line in loglines:
-		data = line.split(",")
-		piclog[data[0]] = data[1].strip().upper()
-	piclog = collections.OrderedDict(sorted(piclog.items()))
+	if os.path.isfile(foldername + con.PICLOG):
+		loglines = get_lines(foldername + con.PICLOG)
+		for line in loglines:
+			data = line.split(",")
+			piclog[data[0]] = data[1].strip().upper()
+		piclog = collections.OrderedDict(sorted(piclog.items()))
 	return piclog
 
 
@@ -221,20 +222,24 @@ def perform_sweep():
 				deletefiles.append(picpics[ind])
 			if con.SWEEPMODE == con.PRINT:
 				for f in deletefiles:
-					print "would remove file " + key + f
+					print "would remove file " + key + "/" + f
 			elif con.SWEEPMODE == con.DELETE:
 				for f in deletefiles:
-					os.remove(key + f)
+					os.remove(con.PICS + key + "/" + f)
 			elif con.SWEEPMODE == con.MOVE:
-				mfolder = con.MOVEFOLDER + key.split("/")[2]
+				mfolder = con.MOVEFOLDER + key
 				for f in deletefiles:
 					if not os.path.exists(mfolder):
 						os.makedirs(mfolder)
-					os.rename(key + f, mfolder + "/" + f)
+						shutil.copyfile(con.PICS + key + "/" + con.PICLOG, mfolder + "/" + con.PICLOG)
+						shutil.copyfile(con.PICS + key + "/" + con.PULSELOG, mfolder + "/" +con.PULSELOG)
+					os.rename(con.PICS + key + f, mfolder + "/" + f)
 			if con.LOGGING:
-				log.log_picture_deletion(key + f)
-			if len(get_dir_content(key)) == 0:
-				os.rmdir(key)
+				log.log_picture_deletion(con.PICS + key + f)
+			if len(get_dir_content(con.pics + key)) == 2:
+				for f in get_dir_content(con.PICS + key):
+					os.remove(con.PICS +key + "/" + f)
+				os.rmdir(con.PICS + key)
 
 # writes sweep information into the sweepfile
 def write_sweep(folder, file_number, timestamp):	
@@ -255,7 +260,6 @@ def update_sweepfile():
 			timestamp = log.get_date_timestamp()
 			write_sweep(folder, file_number, timestamp)
 	
-
 # display that we import files
 def display_import_files():
 	global screen
@@ -311,7 +315,7 @@ def check_import(withDisplay):
 		if con.LOGGING and numFolders < len(get_dir_content(con.PICS)):
 			log.log_data_transfer_finish()
 
-
+# display a text that explains that there are no pictures yet
 def display_no_pictures():
     global screen
     screen.fill(con.BACKGROUNDCOLOUR)
@@ -355,7 +359,6 @@ def main():
 	GPIO.setmode(GPIO.BCM)
 	GPIO.setup(4,GPIO.IN, pull_up_down=GPIO.PUD_DOWN)	
 	init_pygame()
-	log.append_line(con.STATIONLOG, log.get_line(str(type(screen))))
 	if con.LOGGING:
 		log.log_start_station()
 	check_import(importDisplay)
