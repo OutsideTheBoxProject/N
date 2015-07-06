@@ -1,3 +1,15 @@
+# Hardware Setup:
+# GIPO  
+# 0     SDA Real Time Clock
+# 1     SCL Real Time Clock
+# 4     Weiter Button
+# 17    Shutdown Button
+# 3.3V  both Buttons (active high, internal pull down resistor)
+# 5V    VCC Real Time Clock
+# GND   GND Real Time Clock
+# Reset Power on Button
+
+
 # global imports
 import os, random, numpy, time, math, collections, shutil
 import pygame
