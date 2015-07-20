@@ -2,7 +2,7 @@
 # GIPO  
 # 0     SDA Real Time Clock
 # 1     SCL Real Time Clock
-# 4     Weiter Button
+# 4     Weiter / Pause Button
 # 17    Shutdown Button
 # 3.3V  both Buttons (active high, internal pull down resistor)
 # 5V    VCC Real Time Clock
@@ -122,7 +122,7 @@ def perform_pic_loop(foldername, pics):
 		# display pic
 		if (running == 0 or (pygame.time.get_ticks() - running) > con.WAITTIME) and (len(pics) > 0) and not pause:
 			screen.fill(con.BACKGROUNDCOLOUR)
-			screen.blit(pygame.image.load(foldername + pics[pics.keys()[i]]), ((con.SCREENWIDTH - con.PICTUREWIDTH), 0))
+			screen.blit(pygame.transform.rotate(pygame.image.load(foldername + pics[pics.keys()[i]]), -90), ((con.SCREENWIDTH - con.PICTUREWIDTH), 0))
 			pygame.display.flip()
 			running = pygame.time.get_ticks()
 			display_bpms(pics, i, bpms)
@@ -207,8 +207,9 @@ def get_sweep_data():
 	sweeplines = get_lines(con.SWEEPFILE)
 	sweeps = {}
 	for line in sweeplines:
-		linecontent = line.split(", ")
-		sweeps[linecontent[0]] = [int(linecontent[1]), get_days(linecontent[2])]
+        if line.find(" ,") != 0:
+            linecontent = line.split(", ")
+            sweeps[linecontent[0]] = [int(linecontent[1]), get_days(linecontent[2])]
 	return sweeps
 
 
@@ -371,6 +372,7 @@ def main():
 	GPIO.setmode(GPIO.BCM)
 	GPIO.setup(4,GPIO.IN, pull_up_down=GPIO.PUD_DOWN)	
 	init_pygame()
+    pygame.mouse.set_visible(False)
 	if con.LOGGING:
 		log.log_start_station()
 	check_import(importDisplay)
