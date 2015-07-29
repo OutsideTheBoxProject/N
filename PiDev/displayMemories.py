@@ -1,3 +1,15 @@
+# Hardware Setup:
+# GIPO  
+# 0     SDA Real Time Clock
+# 1     SCL Real Time Clock
+# 4     Weiter / Pause Button
+# 17    Shutdown Button
+# 3.3V  both Buttons (active high, internal pull down resistor)
+# 5V    VCC Real Time Clock
+# GND   GND Real Time Clock
+# Reset Power on Button
+
+
 # global imports
 import os, random, numpy, time, math, collections, shutil
 import pygame
@@ -115,6 +127,7 @@ def perform_pic_loop(foldername, pics):
 	while True:
 		# display pic
 		if (running == 0 or (pygame.time.get_ticks() - running) > con.WAITTIME) and (len(pics) > 0) and not pause:
+<<<<<<< HEAD
 			if os.path.isfile(foldername + pics[pics.keys()[i]]): 
 				screen.fill(con.BACKGROUNDCOLOUR)
 				screen.blit(pygame.transform.rotate(pygame.image.load(foldername + pics[pics.keys()[i]]), -90), ((con.SCREENWIDTH - con.PICTUREWIDTH), 0))
@@ -124,6 +137,13 @@ def perform_pic_loop(foldername, pics):
 			else:
 				print foldername + pics[pics.keys()[i]] + " doesn't seem to exist."
 				break
+=======
+			screen.fill(con.BACKGROUNDCOLOUR)
+			screen.blit(pygame.transform.rotate(pygame.image.load(foldername + pics[pics.keys()[i]]), -90), ((con.SCREENWIDTH - con.PICTUREWIDTH), 0))
+			pygame.display.flip()
+			running = pygame.time.get_ticks()
+			display_bpms(pics, i, bpms)
+>>>>>>> f84a12e4d451a9161330af2a8aa717f698fbc394
 			i = i + 1
 			if i >= len(pics):
 				break 
@@ -206,6 +226,7 @@ def get_sweep_data():
 	sweeplines = get_lines(con.SWEEPFILE)
 	sweeps = {}
 	for line in sweeplines:
+<<<<<<< HEAD
 		if "," in line:
 			linecontent = line.split(", ")
 			print linecontent[0]
@@ -213,6 +234,11 @@ def get_sweep_data():
 				sweeps[linecontent[0]] = [int(linecontent[1]), get_days(linecontent[2])]
 			else: 
 				"folder does not exist. "
+=======
+        if line.find(" ,") != 0:
+            linecontent = line.split(", ")
+            sweeps[linecontent[0]] = [int(linecontent[1]), get_days(linecontent[2])]
+>>>>>>> f84a12e4d451a9161330af2a8aa717f698fbc394
 	return sweeps
 
 # updates the sweep data post sweep
@@ -384,7 +410,11 @@ def main():
 	GPIO.setmode(GPIO.BCM)
 	GPIO.setup(4,GPIO.IN, pull_up_down=GPIO.PUD_DOWN)	
 	init_pygame()
+<<<<<<< HEAD
 	pygame.mouse.set_visible(False)
+=======
+    pygame.mouse.set_visible(False)
+>>>>>>> f84a12e4d451a9161330af2a8aa717f698fbc394
 	if con.LOGGING:
 		log.log_start_station()
 	check_import(importDisplay)
