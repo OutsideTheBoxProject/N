@@ -34,7 +34,11 @@ def get_lines(textfile):
 # create a dictionary holding the bpm 	
 def get_bpm_dictionary(foldername):
 	bpms = {}
-	pulselines = get_lines(foldername + con.PULSELOG)
+	if os.path.isfile(foldername + con.PULSELOG):
+		pulselines = get_lines(foldername + con.PULSELOG)
+	else: 
+		print "no pulse log"
+		return None
 	lastStamp = ""
 	pulses = []
 	for line in pulselines:
@@ -106,14 +110,20 @@ def perform_pic_loop(foldername, pics):
 	global running, screen, pause
 	i = 0
 	bpms = get_bpm_dictionary(foldername)
+	if bpms == None:
+		return
 	while True:
 		# display pic
 		if (running == 0 or (pygame.time.get_ticks() - running) > con.WAITTIME) and (len(pics) > 0) and not pause:
-			screen.fill(con.BACKGROUNDCOLOUR)
-			screen.blit(pygame.image.load(foldername + pics[pics.keys()[i]]), ((con.SCREENWIDTH - con.PICTUREWIDTH), 0))
-			pygame.display.flip()
-			running = pygame.time.get_ticks()
-			display_bpms(pics, i, bpms)
+			if os.path.isfile(foldername + pics[pics.keys()[i]]): 
+				screen.fill(con.BACKGROUNDCOLOUR)
+				screen.blit(pygame.transform.rotate(pygame.image.load(foldername + pics[pics.keys()[i]]), -90), ((con.SCREENWIDTH - con.PICTUREWIDTH), 0))
+				pygame.display.flip()
+				display_bpms(pics, i, bpms)
+				running = pygame.time.get_ticks()
+			else:
+				print foldername + pics[pics.keys()[i]] + " doesn't seem to exist."
+				break
 			i = i + 1
 			if i >= len(pics):
 				break 
@@ -164,6 +174,7 @@ def play_all_files(filedir):
 	pics = []
 	for folder in folders:
 		rawPics = get_order_of_pictures(filedir + folder + "/")
+		print "showing pictures in " + filedir + folder + "/"
 		perform_pic_loop(filedir + folder + "/", rawPics)
 
 # returns the correct number of days happened in that year up to the month given
@@ -195,10 +206,22 @@ def get_sweep_data():
 	sweeplines = get_lines(con.SWEEPFILE)
 	sweeps = {}
 	for line in sweeplines:
-		linecontent = line.split(", ")
-		sweeps[linecontent[0]] = [int(linecontent[1]), get_days(linecontent[2])]
+		if "," in line:
+			linecontent = line.split(", ")
+			print linecontent[0]
+			if os.path.isfile(con.PICS + linecontent[0]):
+				sweeps[linecontent[0]] = [int(linecontent[1]), get_days(linecontent[2])]
+			else: 
+				"folder does not exist. "
 	return sweeps
 
+# updates the sweep data post sweep
+def post_sweep_update():
+	sweepdata = get_sweep_data()
+	os.rmfile(con.SWEEPFILE)
+	for key,value in sweepdata: 
+		if os.path.isfile(con.PICS + key):
+			write_sweep(key, value[0], value[1])
 
 # actually sweep pictures according to half time according to sweep mode
 def perform_sweep():
@@ -233,13 +256,15 @@ def perform_sweep():
 						os.makedirs(mfolder)
 						shutil.copyfile(con.PICS + key + "/" + con.PICLOG, mfolder + "/" + con.PICLOG)
 						shutil.copyfile(con.PICS + key + "/" + con.PULSELOG, mfolder + "/" +con.PULSELOG)
-					os.rename(con.PICS + key + f, mfolder + "/" + f)
+					os.rename(con.PICS + key + "/" + f, mfolder + "/" + f)
 			if con.LOGGING:
 				log.log_picture_deletion(con.PICS + key + f)
-			if len(get_dir_content(con.pics + key)) == 2:
+			if len(get_dir_content(con.PICS + key)) == 2:
 				for f in get_dir_content(con.PICS + key):
 					os.remove(con.PICS +key + "/" + f)
 				os.rmdir(con.PICS + key)
+		post_sweep_update()
+	print "performed sweep."
 
 # writes sweep information into the sweepfile
 def write_sweep(folder, file_number, timestamp):	
@@ -359,6 +384,7 @@ def main():
 	GPIO.setmode(GPIO.BCM)
 	GPIO.setup(4,GPIO.IN, pull_up_down=GPIO.PUD_DOWN)	
 	init_pygame()
+	pygame.mouse.set_visible(False)
 	if con.LOGGING:
 		log.log_start_station()
 	check_import(importDisplay)
