@@ -127,7 +127,6 @@ def perform_pic_loop(foldername, pics):
 	while True:
 		# display pic
 		if (running == 0 or (pygame.time.get_ticks() - running) > con.WAITTIME) and (len(pics) > 0) and not pause:
-<<<<<<< HEAD
 			if os.path.isfile(foldername + pics[pics.keys()[i]]): 
 				screen.fill(con.BACKGROUNDCOLOUR)
 				screen.blit(pygame.transform.rotate(pygame.image.load(foldername + pics[pics.keys()[i]]), -90), ((con.SCREENWIDTH - con.PICTUREWIDTH), 0))
@@ -137,13 +136,7 @@ def perform_pic_loop(foldername, pics):
 			else:
 				print foldername + pics[pics.keys()[i]] + " doesn't seem to exist."
 				break
-=======
-			screen.fill(con.BACKGROUNDCOLOUR)
-			screen.blit(pygame.transform.rotate(pygame.image.load(foldername + pics[pics.keys()[i]]), -90), ((con.SCREENWIDTH - con.PICTUREWIDTH), 0))
-			pygame.display.flip()
 			running = pygame.time.get_ticks()
-			display_bpms(pics, i, bpms)
->>>>>>> f84a12e4d451a9161330af2a8aa717f698fbc394
 			i = i + 1
 			if i >= len(pics):
 				break 
@@ -226,7 +219,6 @@ def get_sweep_data():
 	sweeplines = get_lines(con.SWEEPFILE)
 	sweeps = {}
 	for line in sweeplines:
-<<<<<<< HEAD
 		if "," in line:
 			linecontent = line.split(", ")
 			print linecontent[0]
@@ -234,31 +226,29 @@ def get_sweep_data():
 				sweeps[linecontent[0]] = [int(linecontent[1]), get_days(linecontent[2])]
 			else: 
 				"folder does not exist. "
-=======
-        if line.find(" ,") != 0:
-            linecontent = line.split(", ")
-            sweeps[linecontent[0]] = [int(linecontent[1]), get_days(linecontent[2])]
->>>>>>> f84a12e4d451a9161330af2a8aa717f698fbc394
 	return sweeps
 
 # updates the sweep data post sweep
 def post_sweep_update():
 	sweepdata = get_sweep_data()
-	os.rmfile(con.SWEEPFILE)
-	for key,value in sweepdata: 
+	os.remove(con.SWEEPFILE)
+	print sweepdata
+	for key in sweepdata: 
 		if os.path.isfile(con.PICS + key):
-			write_sweep(key, value[0], value[1])
+			write_sweep(key, sweepdata[key][0], sweepdata[key][1])
 
 # actually sweep pictures according to half time according to sweep mode
 def perform_sweep():
 	sweepdata = get_sweep_data()
+	curpics = []
 	if len(sweepdata) == 0:
 		return
 	todaydays = get_days(time.strftime("%Y-%m-%d"))
 	for key in sweepdata.keys():
 		to = int((todaydays - sweepdata[key][1])//con.SWEEPTIME)
 		maxpics = int( (1/(2**to)) * sweepdata[key][0])
-		curpics = get_dir_content(con.PICS + key)
+		if os.path.exists(con.PICS  + key):
+			curpics = get_dir_content(con.PICS + key)
 		picpics = []
 		for potpic in curpics:
 			if "JPG" in potpic:
@@ -410,11 +400,7 @@ def main():
 	GPIO.setmode(GPIO.BCM)
 	GPIO.setup(4,GPIO.IN, pull_up_down=GPIO.PUD_DOWN)	
 	init_pygame()
-<<<<<<< HEAD
 	pygame.mouse.set_visible(False)
-=======
-    pygame.mouse.set_visible(False)
->>>>>>> f84a12e4d451a9161330af2a8aa717f698fbc394
 	if con.LOGGING:
 		log.log_start_station()
 	check_import(importDisplay)
