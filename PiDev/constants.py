@@ -22,12 +22,12 @@ SWEEPTIME = 7
 PRINT = 0
 MOVE = 1
 DELETE = 2
-SWEEPMODE = MOVE
+SWEEPMODE = DELETE
 MOVEFOLDER = LOCAL_DIR + "deletedpics/"
 
 FONT = LOCAL_DIR + "AblePro.otf"
 
-LOGGING = True
+LOGGING = False
 BPM = LOCAL_DIR + "BPM/"
 PICS = LOCAL_DIR + "pics/"
 STATIONLOG = LOCAL_DIR + "stationlog.csv"
